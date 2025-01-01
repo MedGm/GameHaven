@@ -1,0 +1,126 @@
+<?php //property_metadata_515d3e75c657164b
+
+return [PHP_INT_MAX, static fn () => \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['ApiPlatform\\Metadata\\ApiProperty'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('ApiPlatform\\Metadata\\ApiProperty')),
+        clone ($p['Symfony\\Component\\PropertyInfo\\Type'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\PropertyInfo\\Type')),
+    ],
+    null,
+    [
+        'ApiPlatform\\Metadata\\ApiProperty' => [
+            'types' => [
+                null,
+            ],
+            'serialize' => [
+                [],
+            ],
+            'description' => [
+                null,
+            ],
+            'readable' => [
+                true,
+            ],
+            'writable' => [
+                true,
+            ],
+            'readableLink' => [
+                null,
+            ],
+            'writableLink' => [
+                null,
+            ],
+            'required' => [
+                false,
+            ],
+            'identifier' => [
+                null,
+            ],
+            'default' => [
+                null,
+            ],
+            'example' => [
+                null,
+            ],
+            'deprecationReason' => [
+                null,
+            ],
+            'fetchable' => [
+                null,
+            ],
+            'fetchEager' => [
+                null,
+            ],
+            'jsonldContext' => [
+                null,
+            ],
+            'openapiContext' => [
+                null,
+            ],
+            'jsonSchemaContext' => [
+                null,
+            ],
+            'push' => [
+                null,
+            ],
+            'security' => [
+                null,
+            ],
+            'securityPostDenormalize' => [
+                null,
+            ],
+            'builtinTypes' => [
+                [
+                    $o[1],
+                ],
+            ],
+            'schema' => [
+                [
+                    'type' => [
+                        'string',
+                        'null',
+                    ],
+                ],
+            ],
+            'initializable' => [
+                true,
+            ],
+            'genId' => [
+                null,
+            ],
+            'uriTemplate' => [
+                null,
+            ],
+            'property' => [
+                null,
+            ],
+            'policy' => [
+                null,
+            ],
+            'extraProperties' => [
+                [],
+            ],
+        ],
+        'Symfony\\Component\\PropertyInfo\\Type' => [
+            'collectionKeyType' => [
+                1 => [],
+            ],
+            'collectionValueType' => [
+                1 => [],
+            ],
+            'builtinType' => [
+                1 => 'string',
+            ],
+            'nullable' => [
+                1 => true,
+            ],
+            'class' => [
+                1 => null,
+            ],
+            'collection' => [
+                1 => false,
+            ],
+        ],
+    ],
+    $o[0],
+    []
+)];

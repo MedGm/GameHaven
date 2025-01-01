@@ -1,0 +1,101 @@
+<?php //property_metadata_848e0ce7fcde9598
+
+return [PHP_INT_MAX, static fn () => \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (\Symfony\Component\VarExporter\Internal\Registry::$prototypes['ApiPlatform\\Metadata\\ApiProperty'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('ApiPlatform\\Metadata\\ApiProperty')),
+    ],
+    null,
+    [
+        'ApiPlatform\\Metadata\\ApiProperty' => [
+            'types' => [
+                null,
+            ],
+            'serialize' => [
+                [],
+            ],
+            'description' => [
+                null,
+            ],
+            'readable' => [
+                false,
+            ],
+            'writable' => [
+                false,
+            ],
+            'readableLink' => [
+                null,
+            ],
+            'writableLink' => [
+                null,
+            ],
+            'required' => [
+                false,
+            ],
+            'identifier' => [
+                null,
+            ],
+            'default' => [
+                null,
+            ],
+            'example' => [
+                null,
+            ],
+            'deprecationReason' => [
+                null,
+            ],
+            'fetchable' => [
+                null,
+            ],
+            'fetchEager' => [
+                null,
+            ],
+            'jsonldContext' => [
+                null,
+            ],
+            'openapiContext' => [
+                null,
+            ],
+            'jsonSchemaContext' => [
+                null,
+            ],
+            'push' => [
+                null,
+            ],
+            'security' => [
+                null,
+            ],
+            'securityPostDenormalize' => [
+                null,
+            ],
+            'builtinTypes' => [
+                [],
+            ],
+            'schema' => [
+                [
+                    'readOnly' => true,
+                    'writeOnly' => true,
+                ],
+            ],
+            'initializable' => [
+                false,
+            ],
+            'genId' => [
+                null,
+            ],
+            'uriTemplate' => [
+                null,
+            ],
+            'property' => [
+                null,
+            ],
+            'policy' => [
+                null,
+            ],
+            'extraProperties' => [
+                [],
+            ],
+        ],
+    ],
+    $o[0],
+    []
+)];

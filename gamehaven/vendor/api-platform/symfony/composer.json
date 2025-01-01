@@ -1,0 +1,118 @@
+{
+    "name": "api-platform/symfony",
+    "description": "Symfony API Platform integration",
+    "type": "symfony-bundle",
+    "keywords": [
+        "Symfony",
+        "REST",
+        "GraphQL",
+        "API",
+        "JSON-LD",
+        "Hydra",
+        "JSONAPI",
+        "OpenAPI",
+        "HAL",
+        "Swagger"
+    ],
+    "homepage": "https://api-platform.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kévin Dunglas",
+            "email": "kevin@dunglas.fr",
+            "homepage": "https://dunglas.fr"
+        },
+        {
+            "name": "API Platform Community",
+            "homepage": "https://api-platform.com/community/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "api-platform/documentation": "^3.4 || ^4.0",
+        "api-platform/http-cache": "^3.4 || ^4.0",
+        "api-platform/json-schema": "^3.4 || ^4.0",
+        "api-platform/jsonld": "^3.4 || ^4.0",
+        "api-platform/hydra": "^3.4 || ^4.0",
+        "api-platform/metadata": "^3.4 || ^4.0",
+        "api-platform/serializer": "^3.4 || ^4.0",
+        "api-platform/state": "^3.4 || ^4.0",
+        "api-platform/validator": "^3.4 || ^4.0",
+        "api-platform/openapi": "^3.4 || ^4.0",
+        "symfony/property-info": "^6.4 || ^7.0",
+        "symfony/property-access": "^6.4 || ^7.0",
+        "symfony/serializer": "^6.4 || ^7.0",
+        "symfony/security-core": "^6.4 || ^7.0",
+        "willdurand/negotiation": "^3.1"
+    },
+    "require-dev": {
+        "phpspec/prophecy-phpunit": "^2.2",
+        "symfony/routing": "^6.4 || ^7.0",
+        "phpunit/phpunit": "^11.2",
+        "symfony/validator": "^6.4 || ^7.0",
+        "symfony/mercure-bundle": "*",
+        "webonyx/graphql-php": "^15.0",
+        "api-platform/doctrine-common": "^3.4 || ^4.0",
+        "api-platform/elasticsearch": "^3.4 || ^4.0",
+        "api-platform/graphql": "^3.4 || ^4.0",
+        "api-platform/doctrine-orm": "^3.4 || ^4.0",
+        "api-platform/doctrine-odm": "^3.4 || ^4.0",
+        "api-platform/parameter-validator": "^3.1",
+        "symfony/expression-language": "^6.4 || ^7.0"
+    },
+    "suggest": {
+        "api-platform/doctrine-orm": "To support Doctrine ORM.",
+        "api-platform/doctrine-odm": "To support MongoDB. Only versions 4.0 and later are supported.",
+        "api-platform/elasticsearch": "To support Elasticsearch.",
+        "api-platform/graphql": "To support GraphQL.",
+        "api-platform/ramsey-uuid": "To support Ramsey's UUID identifiers.",
+        "ocramius/package-versions": "To display the API Platform's version in the debug bar.",
+        "phpstan/phpdoc-parser": "To support extracting metadata from PHPDoc.",
+        "psr/cache-implementation": "To use metadata caching.",
+        "symfony/cache": "To have metadata caching when using Symfony integration.",
+        "symfony/config": "To load XML configuration files.",
+        "symfony/expression-language": "To use authorization and mercure advanced features.",
+        "symfony/http-client": "To use the HTTP cache invalidation system.",
+        "symfony/security": "To use authorization features.",
+        "symfony/twig-bundle": "To use the Swagger UI integration.",
+        "symfony/uid": "To support Symfony UUID/ULID identifiers.",
+        "symfony/messenger": "To support messenger integration and asynchronous Mercure updates.",
+        "symfony/mercure-bundle": "To support mercure integration.",
+        "symfony/web-profiler-bundle": "To use the data collector."
+    },
+    "autoload": {
+        "psr-4": {
+            "ApiPlatform\\Symfony\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "config": {
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "phpstan/extension-installer": true,
+            "php-http/discovery": false
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "4.0.x-dev",
+            "dev-3.4": "3.4.x-dev"
+        },
+        "symfony": {
+            "require": "^6.4 || ^7.0"
+        },
+        "thanks": {
+            "name": "api-platform/api-platform",
+            "url": "https://github.com/api-platform/api-platform"
+        }
+    },
+    "scripts": {
+        "test": "./vendor/bin/phpunit"
+    }
+}
