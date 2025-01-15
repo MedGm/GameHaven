@@ -1,0 +1,298 @@
+GameHaven API Testing Guide (Session-Based Authentication)
+=======================================
+
+STEP 1: ENVIRONMENT SETUP
+-----------------------
+1. Click on "Environments" in the left sidebar
+2. Click "+" to create new environment
+3. Name it "GameHaven Local"
+4. Add variable:
+   - BASE_URL: http://localhost:8000
+5. Save and select from dropdown
+
+STEP 2: COLLECTION SETUP
+----------------------
+1. Create new collection "GameHaven API"
+2. Enable "Automatically follow redirects" in collection settings
+3. Enable "Send cookies" in collection settings
+
+STEP 3: TESTING AUTHENTICATION
+---------------------------
+1. Register New User:
+POST {{BASE_URL}}/api/users/register
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "password123",
+    "username": "testuser"
+}
+
+2. Login:
+POST {{BASE_URL}}/api/login
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "password123"
+}
+
+3. Get Profile (uses session cookie automatically):
+GET {{BASE_URL}}/api/users/profile
+
+4. Logout:
+POST {{BASE_URL}}/api/logout
+
+STEP 4: TESTING PROTECTED ENDPOINTS
+--------------------------------
+After login, Postman will automatically handle the session cookie:
+
+1. Get User Profile:
+GET {{BASE_URL}}/api/users/profile
+
+2. Update Profile:
+PUT {{BASE_URL}}/api/users/profile
+Content-Type: application/json
+
+{
+    "username": "newusername",
+    "avatarUrl": "https://example.com/avatar.jpg"
+}
+
+STEP 5: TESTING GAME LISTINGS
+---------------------------
+1. Create Listing:
+POST {{BASE_URL}}/api/listings
+Content-Type: application/json
+
+{
+    "title": "The Last of Us Part II",
+    "platform": "PS5",
+    "condition": "new",     // This stays the same in the API
+    "price": 39.99,
+    "description": "Played once, perfect condition",
+    "status": "Available"
+}
+
+Alternative test payloads (try these one by one):
+{
+    "title": "The Last of Us Part II",
+    "platform": "PS5",
+    "condition": "LIKE_NEW",    // Try enum-style format
+    "price": 39.99,
+    "description": "Played once, perfect condition"
+}
+
+{
+    "title": "The Last of Us Part II",
+    "platform": "PS5",
+    "condition": "GOOD",    // Try uppercase
+    "price": 39.99,
+    "description": "Played once, perfect condition"
+}
+
+{
+    "title": "The Last of Us Part II",
+    "platform": "PS5",
+    "condition": "USED",    // Try simple condition
+    "price": 39.99,
+    "description": "Played once, perfect condition"
+}
+
+Debugging Tips:
+--------------
+1. Check the GameListing entity in your Symfony backend for the exact validation constraints
+2. Look for an enum or const definition that lists valid conditions
+3. Try accessing the endpoint with ?XDEBUG_SESSION=1 to debug backend validation
+4. Check your API logs for more detailed error messages
+
+Notes for Game Listing Validation:
+--------------------------------
+- Condition (lowercase, must be exactly one of these):
+  * "new"
+  * "like new"
+  * "good"
+  * "acceptable"
+
+- Platform (must be one of these):
+  * "PS5"
+  * "PS4"
+  * "Xbox Series X"
+  * "Xbox One"
+  * "Nintendo Switch"
+  * "PC"
+
+- Status (if included):
+  * "Available"
+  * "Sold"
+  * "Reserved"
+
+Test multiple variations:
+-----------------------
+{
+    "title": "FIFA 23",
+    "platform": "PS4",
+    "condition": "like new",
+    "price": 25.99,
+    "description": "Used but in excellent condition"
+}
+
+{
+    "title": "Zelda: BOTW",
+    "platform": "Switch",
+    "condition": "New",
+    "price": 45.99,
+    "description": "Sealed, never opened"
+}
+
+2. Get All Listings:
+GET {{BASE_URL}}/api/listings
+
+3. Get Single Listing:
+GET {{BASE_URL}}/api/listings/{id}
+
+4. Update Listing:
+PUT {{BASE_URL}}/api/listings/{id}
+Content-Type: application/json
+
+{
+    "price": 35.99,
+    "status": "ON_SALE"
+}
+
+5. Delete Listing:
+DELETE {{BASE_URL}}/api/listings/{id}
+
+STEP 6: TESTING WISHLIST
+----------------------
+1. Add to Wishlist:
+POST {{BASE_URL}}/api/wishlist
+Content-Type: application/json
+
+{
+    "game_listing_id": 1    // Replace with an actual game listing ID
+}
+
+Expected Response:
+{
+    "message": "Added to wishlist successfully",
+    "wishlist": {
+        "id": 1,
+        "game_listing": {
+            "id": 1,
+            "title": "Game Title"
+        }
+    }
+}
+
+2. Get User's Wishlist:
+GET {{BASE_URL}}/api/wishlist
+
+3. Remove from Wishlist:
+DELETE {{BASE_URL}}/api/wishlist/{id}    // Replace {id} with actual wishlist ID
+
+Notes:
+- Must be authenticated
+- game_listing_id must exist in the database
+- Cannot add the same game listing twice
+- Only the wishlist owner can delete their wishlist items
+
+STEP 7: TESTING TRANSACTIONS
+-------------------------
+1. Create Transaction:
+POST {{BASE_URL}}/api/transactions
+Content-Type: application/json
+
+{
+    "game_listing_id": 1    // Must be an available listing you don't own
+}
+
+Expected Response:
+{
+    "message": "Transaction created successfully",
+    "transaction": {
+        "id": 1,
+        "status": "Pending",
+        "game_listing": {
+            "id": 1,
+            "title": "Game Title",
+            "price": 39.99
+        }
+    }
+}
+
+2. Get User's Transactions:
+GET {{BASE_URL}}/api/transactions
+
+3. Update Transaction Status (Seller Only):
+PUT {{BASE_URL}}/api/transactions/{id}
+Content-Type: application/json
+
+{
+    "status": "Completed"    // Valid statuses: "Pending", "Completed", "Cancelled"
+}
+
+Notes:
+- Must be authenticated
+- Cannot buy your own listings
+- Only the seller can update transaction status
+- Status updates affect the game listing status automatically
+- Completing a transaction marks the listing as "Sold"
+- Cancelling a transaction marks the listing as "Available"
+
+STEP 8: TESTING REVIEWS
+---------------------
+1. Create Review:
+POST {{BASE_URL}}/api/reviews
+Content-Type: application/json
+
+{
+    "seller_id": 1,
+    "rating": 5,         // Rating must be between 1-5
+    "comment": "Great seller, fast shipping!"    // Optional
+}
+
+Expected Response:
+{
+    "message": "Review created successfully",
+    "review": {
+        "id": 1,
+        "rating": 5,
+        "comment": "Great seller, fast shipping!"
+    }
+}
+
+2. Get User's Reviews:
+GET {{BASE_URL}}/api/users/{seller_id}/reviews
+
+3. Update Review:
+PUT {{BASE_URL}}/api/reviews/{id}
+Content-Type: application/json
+
+{
+    "rating": 4,
+    "comment": "Updated review comment"
+}
+
+4. Delete Review:
+DELETE {{BASE_URL}}/api/reviews/{id}
+
+Notes:
+- Must be authenticated
+- Cannot review yourself
+- Only the reviewer can update/delete their own reviews
+- Rating must be between 1 and 5
+- Comment is optional
+- seller_id must exist in the database
+
+NOTES
+-----
+- All endpoints except login/register require authentication
+- Replace {id} with actual IDs from your database
+- Status codes:
+  * 200: Success
+  * 201: Created
+  * 400: Bad Request
+  * 401: Unauthorized
+  * 403: Forbidden
+  * 404: Not Found

@@ -1,0 +1,11 @@
+controllers:
+    resource: ../src/Controller/
+    type: attribute
+
+logout:
+    path: /api/logout
+    methods: [GET, POST]
+
+logout_success:
+    path: /api/logout/success
+    methods: [GET, POST]

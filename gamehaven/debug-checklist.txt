@@ -1,0 +1,16 @@
+1. Check if user exists in database:
+   - php bin/console doctrine:query:sql "SELECT * FROM user WHERE email = 'test@example.com'"
+
+2. Verify JWT keys are properly generated:
+   - Check both private.pem and public.pem exist in config/jwt/
+   - Regenerate if needed: php bin/console lexik:jwt:generate-keypair --force
+
+3. Clear cache:
+   - php bin/console cache:clear
+
+4. Check Symfony logs:
+   - tail -f var/log/dev.log
+
+5. In Postman:
+   - View > Show Postman Console
+   - Send request and check exact request/response details

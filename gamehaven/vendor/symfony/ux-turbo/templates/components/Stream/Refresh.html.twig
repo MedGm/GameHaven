@@ -1,3 +1,0 @@
-{% props requestId = null -%}
-
-<turbo-stream action="refresh"{% if requestId is not null %} request-id="{{ requestId }}"{% endif %} {{- attributes }}></turbo-stream>
