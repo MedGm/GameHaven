@@ -5,14 +5,21 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 
-class UserRepository extends ServiceEntityRepository
+/**
+ * @extends ServiceEntityRepository<User>
+ */
+class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
     }
 
+    
     /**
      * Used to upgrade (rehash) the user's password automatically over time.
      */
@@ -27,63 +34,46 @@ class UserRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function findActiveSellers(): array
+    public function getUser(): array
     {
         return $this->createQueryBuilder('u')
-            ->join('u.listings', 'l')
-            ->where('l.status = :status')
-            ->setParameter('status', 'active')
-            ->groupBy('u.id')
-            ->having('COUNT(l.id) > 0')
+            ->orderBy('u.username', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
-    public function findTopSellers(int $limit = 10): array
+    public function findByUsername(string $username): ?User
     {
         return $this->createQueryBuilder('u')
-            ->leftJoin('u.listings', 'l')
-            ->leftJoin('l.transactions', 't')
-            ->where('t.status = :status')
-            ->setParameter('status', 'completed')
-            ->groupBy('u.id')
-            ->orderBy('COUNT(t.id)', 'DESC')
-            ->setMaxResults($limit)
+            ->andWhere('u.username = :username')
+            ->setParameter('username', $username)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findActiveUsers(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.isActive IS NOT NULL')
+            ->orderBy('u.username', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
-    public function findBySearchTerm(string $term): array
+    public function updateLastLogin(User $user): void
     {
-        return $this->createQueryBuilder('u')
-            ->where('u.username LIKE :term')
-            ->orWhere('u.email LIKE :term')
-            ->setParameter('term', '%' . $term . '%')
-            ->getQuery()
-            ->getResult();
+        $user->setLastLogin(new \DateTime());
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
     }
 
-    public function getUserStatistics(User $user): array
+    public function findByRole(string $role): array
     {
-        $qb = $this->createQueryBuilder('u')
-            ->select('u.id, 
-                     COUNT(DISTINCT l.id) as totalListings,
-                     COUNT(DISTINCT t.id) as totalSales,
-                     AVG(r.rating) as averageRating')
-            ->leftJoin('u.listings', 'l')
-            ->leftJoin('l.transactions', 't')
-            ->leftJoin('u.receivedReviews', 'r')
-            ->where('u.id = :userId')
-            ->setParameter('userId', $user->getId())
-            ->groupBy('u.id');
-
-        $result = $qb->getQuery()->getOneOrNullResult();
-
-        return [
-            'totalListings' => $result['totalListings'] ?? 0,
-            'totalSales' => $result['totalSales'] ?? 0,
-            'averageRating' => round($result['averageRating'] ?? 0, 1),
-        ];
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.role = :role')
+            ->setParameter('role', $role)
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

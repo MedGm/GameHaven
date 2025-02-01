@@ -6,34 +6,25 @@ use App\Repository\WishlistRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: WishlistRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Wishlist
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    #[ORM\SequenceGenerator(sequenceName: 'wishlists_id_seq')]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'wishlists')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(targetEntity: GameListing::class, inversedBy: 'wishlists')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?GameListing $gameListing = null;
+    #[ORM\ManyToOne(targetEntity: Game::class)]
+    #[ORM\JoinColumn(name: 'game_id', referencedColumnName: 'id', nullable: false)]
+    private ?Game $game = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?float $maxPrice = null;
-
-    #[ORM\Column]
-    private bool $notifyOnPriceChange = true;
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-    }
+    #[ORM\Column(type: 'datetime_immutable')]
+    private ?\DateTimeImmutable $addedAt = null;
 
     public function getId(): ?int
     {
@@ -51,47 +42,25 @@ class Wishlist
         return $this;
     }
 
-    public function getGameListing(): ?GameListing
+    public function getGame(): ?Game
     {
-        return $this->gameListing;
+        return $this->game;
     }
 
-    public function setGameListing(?GameListing $gameListing): static
+    public function setGame(?Game $game): static
     {
-        $this->gameListing = $gameListing;
+        $this->game = $game;
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getAddedAt(): ?\DateTimeImmutable
     {
-        return $this->createdAt;
+        return $this->addedAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    #[ORM\PrePersist]
+    public function setAddedAt(): void
     {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    public function getMaxPrice(): ?float
-    {
-        return $this->maxPrice;
-    }
-
-    public function setMaxPrice(?float $maxPrice): static
-    {
-        $this->maxPrice = $maxPrice;
-        return $this;
-    }
-
-    public function isNotifyOnPriceChange(): bool
-    {
-        return $this->notifyOnPriceChange;
-    }
-
-    public function setNotifyOnPriceChange(bool $notify): static
-    {
-        $this->notifyOnPriceChange = $notify;
-        return $this;
+        $this->addedAt = new \DateTimeImmutable();
     }
 }

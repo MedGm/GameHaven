@@ -8,6 +8,16 @@ framework:
     #esi: true
     #fragments: true
 
+    assets:
+        json_manifest_path: ~
+        base_urls: ['%env(ASSET_BASE_URL)%']
+        packages:
+            uploads:
+                base_path: ''
+                version_strategy: null
+                json_manifest_path: ~
+                base_urls: ['%env(ASSET_BASE_URL)%']
+
 when@test:
     framework:
         test: true

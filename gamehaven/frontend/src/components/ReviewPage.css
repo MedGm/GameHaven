@@ -1,0 +1,293 @@
+.review-page {
+  min-height: 100vh;
+  background: var(--gradient-dark);
+  color: var(--text-primary);
+  padding: 80px 2rem 2rem;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5%;
+  margin-bottom: 2rem;
+}
+
+.review-header h1 {
+  font-size: 2.5rem;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.add-review-button {
+  padding: 0.8rem 1.5rem;
+  background: var(--gradient-accent);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* Increased from 300px */
+  gap: 2rem;
+  padding: 0 5%;
+}
+
+.review-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 2.5rem; /* increased padding */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(157, 78, 221, 0.2);
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* added gap between items */
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Add avatar styling */
+.review-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1rem;
+}
+
+.reviewer-name {
+  font-size: 1.3rem; /* slightly increased */
+  font-weight: 600;
+  color: var(--neon-purple);
+}
+
+.review-date {
+  font-size: 1rem; /* adjusted size */
+  color: var(--text-secondary);
+  margin-left: auto; /* push date to the right */
+}
+
+.rating {
+  font-size: 1.4rem; /* Increased size */
+  margin: 1rem 0 1.5rem; /* extra space after rating */
+  display: flex;
+  gap: 1rem; /* increased gap between stars */
+}
+
+.review-card .rating i {
+  /* Default star color */
+  color: rgba(157, 78, 221, 0.3);
+}
+.review-card .rating i.filled {
+  /* Color for filled stars */
+  color: var(--neon-purple) !important;
+}
+
+.review-comment {
+  font-size: 1.1rem;
+  line-height: 1.8; /* increased line height */
+  margin: 2rem 0; /* increased vertical spacing */
+  color: var(--text-primary);
+}
+
+.review-game {
+  margin-top: 2rem; /* increased separation */
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  color: var (--neon-blue);
+}
+
+.no-transactions {
+  text-align: center;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  margin: 2rem 5%;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: rgba(22, 22, 30, 0.95);
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid rgba(157, 78, 221, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  width: 90%;
+  max-width: 500px; /* Reduced from 600px */
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px; /* Added max-width for form content */
+  margin: 0 auto;
+}
+
+.modal-content h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+.modal-content select {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(22, 22, 30, 0.95);
+  border: 1px solid rgba(157, 78, 221, 0.3);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%239d4edd'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.5rem;
+}
+
+/* Style for select options */
+.modal-content select option {
+  background-color: rgba(22, 22, 30, 0.95);
+  color: var(--text-primary);
+  padding: 1rem;
+}
+
+.modal-content select:focus {
+  border-color: var(--neon-purple);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+}
+
+/* Style for select when opened */
+.modal-content select:focus option:hover,
+.modal-content select:focus option:focus,
+.modal-content select:focus option:active,
+.modal-content select:focus option:checked {
+  background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+  color: white;
+}
+
+.rating-select {
+  font-size: 2rem; /* Increased size */
+  margin: 2rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.rating-select i {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: rgba(157, 78, 221, 0.3);
+}
+
+.rating-select i.filled {
+  color: var(--neon-purple);
+  text-shadow: 0 0 10px rgba(157, 78, 221, 0.5);
+}
+
+.rating-select i:hover {
+  transform: scale(1.3) rotate(5deg);
+  color: var(--neon-purple);
+}
+
+.modal-content textarea {
+  width: 100%;
+  min-height: 120px; /* Reduced from 150px */
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(157, 78, 221, 0.3);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: vertical;
+  margin: 1rem 0 1.5rem;
+}
+
+.modal-content textarea:focus {
+  border-color: var(--neon-purple);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-actions button[type="submit"] {
+  background: var(--gradient-accent);
+  border: none;
+  color: var(--text-primary);
+}
+
+.modal-actions button[type="button"] {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(157, 78, 221, 0.3);
+  color: var(--text-primary);
+}
+
+.modal-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  grid-column: 1 / -1;
+  color: var(--text-secondary);
+}

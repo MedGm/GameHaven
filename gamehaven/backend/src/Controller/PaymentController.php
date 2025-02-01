@@ -2,48 +2,54 @@
 
 namespace App\Controller;
 
-use App\Service\PaymentService;
-use App\Service\TransactionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
+use Doctrine\ORM\EntityManagerInterface;
 
-#[Route('/api/payments')]
+#[Route('/api/payments', name: 'app_payment_')]
 class PaymentController extends AbstractController
 {
     public function __construct(
-        private PaymentService $paymentService,
-        private TransactionService $transactionService
-    ) {}
-
-    #[Route('/create-intent/{transactionId}', name: 'create_payment_intent', methods: ['POST'])]
-    public function createPaymentIntent(int $transactionId): JsonResponse
-    {
-        $transaction = $this->transactionService->getTransaction($transactionId);
-        if (!$transaction) {
-            return $this->json(['error' => 'Transaction not found'], 404);
-        }
-
-        try {
-            $intent = $this->paymentService->createPaymentIntent($transaction);
-            return $this->json($intent);
-        } catch (\Exception $e) {
-            return $this->json(['error' => $e->getMessage()], 400);
-        }
+        private EntityManagerInterface $entityManager
+    ) {
+        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
     }
 
-    #[Route('/webhook', name: 'stripe_webhook', methods: ['POST'])]
-    public function handleWebhook(Request $request): JsonResponse
+    #[Route('/create-intent', name: 'create_intent', methods: ['POST'])]
+    public function createPaymentIntent(Request $request): JsonResponse
     {
         try {
-            $this->paymentService->handleWebhook(
-                $request->getContent(),
-                $request->headers->get('Stripe-Signature')
-            );
-            return $this->json(['status' => 'success']);
+            $data = json_decode($request->getContent(), true);
+            
+            // Validate amount
+            if (!isset($data['amount']) || $data['amount'] < 50) { // Minimum 50 cents
+                throw new \Exception('Invalid amount');
+            }
+
+            $paymentIntent = PaymentIntent::create([
+                'amount' => (int) $data['amount'],
+                'currency' => $data['currency'] ?? 'usd',
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                ],
+                'metadata' => [
+                    'transaction_id' => $data['transaction_id'] ?? null,
+                ],
+            ]);
+
+            return $this->json([
+                'clientSecret' => $paymentIntent->client_secret
+            ]);
         } catch (\Exception $e) {
-            return $this->json(['error' => $e->getMessage()], 400);
+            return $this->json([
+                'error' => [
+                    'message' => $e->getMessage()
+                ]
+            ], 500);
         }
     }
 }

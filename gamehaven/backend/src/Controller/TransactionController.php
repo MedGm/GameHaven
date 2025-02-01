@@ -2,137 +2,199 @@
 
 namespace App\Controller;
 
-use App\Entity\GameListing;
-use App\Entity\Transaction;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use App\Entity\Transaction;
+use App\Entity\Listing;
+use App\Entity\User;
+use App\Repository\TransactionRepository;
+use App\Repository\ListingRepository;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/transactions')]
+#[Route('/api/transactions', name: 'app_transaction_')]
 class TransactionController extends AbstractController
 {
-    public function __construct(
-        private EntityManagerInterface $entityManager
-    ) {}
-
-    #[Route('', name: 'create_transaction', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
+    #[Route('', methods: ['GET'], name: 'index')]
+    public function getAllTransactions(TransactionRepository $repo): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        
-        if (!isset($data['game_listing_id'])) {
-            return $this->json(['error' => 'game_listing_id is required'], 400);
-        }
-
-        $gameListing = $this->entityManager->getRepository(GameListing::class)->find($data['game_listing_id']);
-        if (!$gameListing) {
-            return $this->json(['error' => 'Game listing not found'], 404);
-        }
-
-        if ($gameListing->getStatus() !== 'Available') {
-            return $this->json(['error' => 'Game listing is not available'], 400);
-        }
-
-        // Prevent buying own listing
-        if ($gameListing->getSeller() === $this->getUser()) {
-            return $this->json(['error' => 'Cannot purchase your own listing'], 400);
-        }
-
-        $transaction = new Transaction();
-        $transaction->setBuyer($this->getUser());
-        $transaction->setSeller($gameListing->getSeller());
-        $transaction->setGameListing($gameListing);
-        $transaction->setStatus('Pending');
-
-        // Update game listing status
-        $gameListing->setStatus('Reserved');
-        
-        $this->entityManager->persist($transaction);
-        $this->entityManager->flush();
-
-        return $this->json([
-            'message' => 'Transaction created successfully',
-            'transaction' => [
-                'id' => $transaction->getId(),
-                'status' => $transaction->getStatus(),
-                'game_listing' => [
-                    'id' => $gameListing->getId(),
-                    'title' => $gameListing->getTitle(),
-                    'price' => $gameListing->getPrice()
-                ]
-            ]
-        ], 201);
+        return $this->json($repo->findAll());
     }
 
-    #[Route('', name: 'get_transactions', methods: ['GET'])]
-    public function getTransactions(): JsonResponse
+    #[Route('/{id}', methods: ['GET'], name: 'show')]
+    public function getTransaction(int $id, TransactionRepository $repo): JsonResponse
+    {
+        $transaction = $repo->find($id);
+        if (!$transaction) {
+            return $this->json(['message' => 'Transaction not found'], 404);
+        }
+        return $this->json($transaction);
+    }
+
+    #[Route('', methods: ['POST'], name: 'create')]
+    public function createTransaction(
+        Request $request,
+        EntityManagerInterface $em,
+        ListingRepository $listingRepo,
+        UserRepository $userRepo
+    ): JsonResponse
+    {
+        try {
+            $em->beginTransaction();
+            
+            $data = json_decode($request->getContent(), true);
+
+            // Validate required fields
+            if (!isset($data['listing_id'], $data['buyer_id'], $data['seller_id'], $data['price'])) {
+                return $this->json(['message' => 'Missing required fields'], 400);
+            }
+
+            // Find and lock the listing for update
+            $listing = $listingRepo->find($data['listing_id']);
+            
+            if (!$listing) {
+                return $this->json(['message' => 'Listing not found'], 404);
+            }
+
+            // Check if listing is already sold
+            if ($listing->isSold()) {
+                return $this->json(['message' => 'This listing has already been sold'], 400);
+            }
+
+            $buyer = $userRepo->find($data['buyer_id']);
+            $seller = $userRepo->find($data['seller_id']);
+
+            if (!$buyer || !$seller) {
+                return $this->json(['message' => 'Invalid buyer or seller ID'], 400);
+            }
+
+            // Validate seller owns the listing
+            if ($listing->getUser() !== $seller) {
+                return $this->json(['message' => 'Seller does not own this listing'], 403);
+            }
+
+            // Validate buyer is not the seller
+            if ($buyer === $seller) {
+                return $this->json(['message' => 'Cannot buy your own listing'], 400);
+            }
+
+            // Create transaction
+            $transaction = new Transaction();
+            $transaction->setListing($listing);
+            $transaction->setBuyer($buyer);
+            $transaction->setSeller($seller);
+            $transaction->setPrice($data['price']);
+            $transaction->setStatus('pending');
+            
+            if (isset($data['payment_method'])) {
+                $transaction->setPaymentMethod($data['payment_method']);
+            }
+
+            // Mark listing as sold
+            $listing->setSold(true);
+
+            // Persist changes
+            $em->persist($transaction);
+            $em->flush();
+            $em->commit();
+
+            return $this->json([
+                'message' => 'Transaction created successfully',
+                'transaction' => [
+                    'id' => $transaction->getId(),
+                    'status' => $transaction->getStatus(),
+                    'price' => $transaction->getPrice()
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            $em->rollback();
+            return $this->json([
+                'message' => 'Failed to create transaction',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[Route('/{id}', methods: ['PUT'], name: 'update')]
+    public function updateTransaction(
+        int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        TransactionRepository $repo
+    ): JsonResponse
+    {
+        $transaction = $repo->find($id);
+        if (!$transaction) {
+            return $this->json(['message' => 'Transaction not found'], 404);
+        }
+
+        // Only allow buyer or seller to update transaction
+        $currentUser = $this->getUser();
+        if ($currentUser !== $transaction->getBuyer() && $currentUser !== $transaction->getSeller()) {
+            return $this->json(['message' => 'Not authorized to update this transaction'], 403);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        
+        if (isset($data['status'])) {
+            // Validate status
+            $allowedStatuses = ['pending', 'paid', 'completed', 'cancelled'];
+            if (!in_array($data['status'], $allowedStatuses)) {
+                return $this->json(['message' => 'Invalid status value'], 400);
+            }
+            $transaction->setStatus($data['status']);
+        }
+
+        if (isset($data['payment_method'])) {
+            $transaction->setPaymentMethod($data['payment_method']);
+        }
+
+        try {
+            $em->flush();
+            return $this->json(['message' => 'Transaction updated successfully']);
+        } catch (\Exception $e) {
+            return $this->json(['message' => 'Failed to update transaction'], 500);
+        }
+    }
+
+    #[Route('/{id}', methods: ['DELETE'], name: 'delete')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function deleteTransaction(
+        int $id,
+        EntityManagerInterface $em,
+        TransactionRepository $repo
+    ): JsonResponse
+    {
+        $transaction = $repo->find($id);
+        if (!$transaction) {
+            return $this->json(['message' => 'Transaction not found'], 404);
+        }
+
+        try {
+            $em->remove($transaction);
+            $em->flush();
+            return $this->json(['message' => 'Transaction deleted successfully']);
+        } catch (\Exception $e) {
+            return $this->json(['message' => 'Failed to delete transaction'], 500);
+        }
+    }
+
+    #[Route('/user/purchases', methods: ['GET'], name: 'user_purchases')]
+    public function getUserPurchases(TransactionRepository $repo): JsonResponse
     {
         $user = $this->getUser();
-        $transactions = $this->entityManager->getRepository(Transaction::class)->findBy([
-            'buyer' => $user
-        ]);
-
-        return $this->json([
-            'transactions' => array_map(fn($transaction) => [
-                'id' => $transaction->getId(),
-                'status' => $transaction->getStatus(),
-                'created_at' => $transaction->getCreatedAt()->format('Y-m-d H:i:s'),
-                'game_listing' => [
-                    'id' => $transaction->getGameListing()->getId(),
-                    'title' => $transaction->getGameListing()->getTitle(),
-                    'price' => $transaction->getGameListing()->getPrice()
-                ],
-                'seller' => [
-                    'id' => $transaction->getSeller()->getId(),
-                    'username' => $transaction->getSeller()->getUsername()
-                ]
-            ], $transactions)
-        ]);
+        return $this->json($repo->findByBuyer($user));
     }
 
-    #[Route('/{id}', name: 'update_transaction', methods: ['PUT'])]
-    public function update(int $id, Request $request): JsonResponse
+    #[Route('/user/sales', methods: ['GET'], name: 'user_sales')]
+    public function getUserSales(TransactionRepository $repo): JsonResponse
     {
-        $transaction = $this->entityManager->getRepository(Transaction::class)->find($id);
-        
-        if (!$transaction) {
-            return $this->json(['error' => 'Transaction not found'], 404);
-        }
-
-        // Only seller can update transaction status
-        if ($transaction->getSeller() !== $this->getUser()) {
-            return $this->json(['error' => 'Not authorized'], 403);
-        }
-
-        $data = json_decode($request->getContent(), true);
-        if (!isset($data['status'])) {
-            return $this->json(['error' => 'Status is required'], 400);
-        }
-
-        $allowedStatuses = ['Pending', 'Completed', 'Cancelled'];
-        if (!in_array($data['status'], $allowedStatuses)) {
-            return $this->json(['error' => 'Invalid status'], 400);
-        }
-
-        $transaction->setStatus($data['status']);
-        
-        // Update game listing status accordingly
-        if ($data['status'] === 'Completed') {
-            $transaction->getGameListing()->setStatus('Sold');
-        } elseif ($data['status'] === 'Cancelled') {
-            $transaction->getGameListing()->setStatus('Available');
-        }
-
-        $this->entityManager->flush();
-
-        return $this->json([
-            'message' => 'Transaction updated successfully',
-            'transaction' => [
-                'id' => $transaction->getId(),
-                'status' => $transaction->getStatus()
-            ]
-        ]);
+        $user = $this->getUser();
+        return $this->json($repo->findBySeller($user));
     }
 }

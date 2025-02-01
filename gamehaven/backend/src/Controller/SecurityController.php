@@ -2,81 +2,48 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Psr\Log\LoggerInterface;
 
-#[Route('/api')]
 class SecurityController extends AbstractController
 {
-    public function __construct(
-        private EntityManagerInterface $entityManager,
-        private UserPasswordHasherInterface $passwordHasher,
-        private LoggerInterface $logger
-    ) {}
-
-    #[Route('/login', name: 'api_login', methods: ['POST'])]
-    public function login(): JsonResponse
+    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
+    public function apiLogin(): JsonResponse
     {
-        // The authentication handler will handle this
-        return $this->json(['message' => 'Authentication in progress']);
+        // This method will not be called, 
+        // as JWT authentication is handled by LexikJWTAuthenticationBundle
+        throw new \RuntimeException('You must configure the check path to be handled by the firewall.');
     }
 
-    #[Route('/logout', name: 'app_logout', methods: ['GET', 'POST'])]
-    public function logout(): never
-    {
-        // This should never be called
-        throw new \Exception('This should never be called directly');
-    }
-
-    #[Route('/users/profile', name: 'api_profile', methods: ['GET'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function profile(): JsonResponse
+    #[Route('/api/logout', name: 'app_api_logout', methods: ['POST'])]
+    public function apiLogout(): JsonResponse
     {
         return $this->json([
-            'user' => [
-                'id' => $this->getUser()->getId(),
-                'email' => $this->getUser()->getEmail(),
-                'username' => $this->getUser()->getUsername()
-            ]
+            'message' => 'Logged out successfully'
         ]);
     }
 
-    #[Route('/debug/auth-test', name: 'api_debug_auth', methods: ['POST'])]
-    #[IsGranted('PUBLIC_ACCESS')]
-    public function debugAuth(Request $request): JsonResponse
+    #[Route(path: '/login', name: 'app_login')]
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        $data = json_decode($request->getContent(), true);
-        $email = $data['email'] ?? null;
-        $password = $data['password'] ?? null;
+        // if ($this->getUser()) {
+        //     return $this->redirectToRoute('target_path');
+        // }
 
-        if (!$email || !$password) {
-            return $this->json(['error' => 'Missing credentials'], 400);
-        }
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
 
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
-        
-        if (!$user) {
-            return $this->json(['error' => 'User not found'], 404);
-        }
+        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+    }
 
-        $isValid = $this->passwordHasher->isPasswordValid($user, $password);
-
-        return $this->json([
-            'found_user' => true,
-            'password_valid' => $isValid,
-            'user_data' => [
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-                'is_active' => $user->isActive()
-            ]
-        ]);
+    #[Route(path: '/logout', name: 'app_logout')]
+    public function logout(): void
+    {
+        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 }

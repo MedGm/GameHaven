@@ -1,0 +1,294 @@
+:root {
+  --primary-black: #0a0a0f;
+  --secondary-black: #16161e;
+  --accent-dark: #1e1e2a;
+  --neon-purple: #9d4edd;
+  --neon-blue: #4361ee;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --gradient-dark: linear-gradient(135deg, var(--primary-black) 0%, var(--accent-dark) 100%);
+  --gradient-accent: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+}
+
+.games-page {
+  position: relative;
+  min-height: 100vh;
+  background: var(--gradient-dark);
+  color: var(--text-primary);
+  padding-top: 80px; /* Add this line to account for fixed navbar */
+}
+
+.games-header {
+  padding: 2rem 5%;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.games-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.games-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  max-width: 600px;
+  position: relative;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  padding-right: 3rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+}
+
+.search-bar button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 3rem;
+  border: none;
+  background: var(--gradient-accent);
+  color: var(--text-primary);
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-bar button:hover {
+  background: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+  transform: translateX(2px);
+}
+
+.search-bar button i {
+  font-size: 1rem;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+}
+
+.filter-select {
+  padding: 0.8rem 2.5rem 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+  background-size: 10px;
+  position: relative;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+}
+
+.filter-select option {
+  background: var(--secondary-black);
+  color: var(--text-primary);
+  padding: 1rem;
+}
+
+.filter-select:hover {
+  border-color: var(--neon-purple);
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 0 5% 2rem;
+}
+
+.game-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+}
+
+.game-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-info {
+  padding: 1.5rem;
+}
+
+.game-title {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.game-details {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.game-platform {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  background: var(--gradient-accent);
+  border-radius: 15px;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.add-game-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  color: var(--text-primary);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.add-game-button:hover {
+  transform: scale(1.1);
+}
+
+.game-image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+}
+
+.upload-image-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.game-image-container:hover .upload-image-btn {
+  opacity: 1;
+}
+
+.upload-image-btn:hover {
+  background: var(--gradient-accent);
+  transform: scale(1.1);
+}
+
+.back-button {
+  position: absolute;
+  left: 5rem;
+  top: 2rem;
+  padding: 0.8rem;
+  width: 3rem;
+  height: 3rem;
+  border: none;
+  background: var(--gradient-accent);
+  color: var(--text-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.back-button:hover {
+  transform: translateX(-2px);
+  box-shadow: 0 4px 20px rgba(157, 78, 221, 0.4);
+}
+
+.back-button i {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .games-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-bar {
+    max-width: 100%;
+  }
+
+  .filters {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .filter-select {
+    flex: 1;
+  }
+}

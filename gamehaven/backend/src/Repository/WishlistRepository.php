@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Wishlist;
+use App\Entity\User;
+use App\Entity\Game;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,52 +18,36 @@ class WishlistRepository extends ServiceEntityRepository
         parent::__construct($registry, Wishlist::class);
     }
 
-    public function findPriceDrops(): array
+    public function findByUser(User $user): array
     {
         return $this->createQueryBuilder('w')
-            ->join('w.gameListing', 'g')
-            ->where('g.status = :status')
-            ->setParameter('status', 'active')
-            ->orderBy('g.price', 'ASC')
+            ->andWhere('w.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('w.addedAt', 'DESC')
             ->getQuery()
             ->getResult();
     }
 
-    public function findWishlistWithDetails(int $userId): array
+    public function findByGame(Game $game): array
     {
         return $this->createQueryBuilder('w')
-            ->addSelect('g', 's')
-            ->join('w.gameListing', 'g')
-            ->join('g.seller', 's')
-            ->where('w.user = :userId')
-            ->setParameter('userId', $userId)
-            ->orderBy('w.createdAt', 'DESC')
+            ->andWhere('w.game = :game')
+            ->setParameter('game', $game)
+            ->orderBy('w.addedAt', 'DESC')
             ->getQuery()
             ->getResult();
     }
 
-    //    /**
-    //     * @return Wishlist[] Returns an array of Wishlist objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('w')
-    //            ->andWhere('w.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('w.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Wishlist
-    //    {
-    //        return $this->createQueryBuilder('w')
-    //            ->andWhere('w.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function isGameInWishlist(User $user, Game $game): bool
+    {
+        $result = $this->createQueryBuilder('w')
+            ->andWhere('w.user = :user')
+            ->andWhere('w.game = :game')
+            ->setParameter('user', $user)
+            ->setParameter('game', $game)
+            ->getQuery()
+            ->getOneOrNullResult();
+            
+        return $result !== null;
+    }
 }

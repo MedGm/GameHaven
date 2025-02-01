@@ -6,49 +6,56 @@ use App\Repository\TransactionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Transaction
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    #[ORM\SequenceGenerator(sequenceName: 'transaction_id_seq')]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: Listing::class)]
+    #[ORM\JoinColumn(name: 'listing_id', referencedColumnName: 'id', nullable: false)]
+    private ?Listing $listing = null;
+
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'buyer_id', referencedColumnName: 'id', nullable: false)]
     private ?User $buyer = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'seller_id', referencedColumnName: 'id', nullable: false)]
     private ?User $seller = null;
 
-    #[ORM\ManyToOne(targetEntity: GameListing::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?GameListing $gameListing = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private ?string $price = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $status = 'pending';
+    #[ORM\Column(length: 20)]
+    private ?string $status = null;
 
-    #[ORM\Column]
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $paymentMethod = null;
+
+    #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $updatedAt = null;
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $paymentId = null;
-
-    #[ORM\Column(type: 'string', length: 50)]
-    private string $paymentMethod = 'pending';
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
-    }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getListing(): ?Listing
+    {
+        return $this->listing;
+    }
+
+    public function setListing(?Listing $listing): static
+    {
+        $this->listing = $listing;
+        return $this;
     }
 
     public function getBuyer(): ?User
@@ -73,14 +80,14 @@ class Transaction
         return $this;
     }
 
-    public function getGameListing(): ?GameListing
+    public function getPrice(): ?string
     {
-        return $this->gameListing;
+        return $this->price;
     }
 
-    public function setGameListing(?GameListing $gameListing): static
+    public function setPrice(string $price): static
     {
-        $this->gameListing = $gameListing;
+        $this->price = $price;
         return $this;
     }
 
@@ -95,6 +102,17 @@ class Transaction
         return $this;
     }
 
+    public function getPaymentMethod(): ?string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(?string $paymentMethod): static
+    {
+        $this->paymentMethod = $paymentMethod;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -105,31 +123,16 @@ class Transaction
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
     {
-        $this->updatedAt = $updatedAt;
-        return $this;
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function getPaymentId(): ?string
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
     {
-        return $this->paymentId;
-    }
-
-    public function setPaymentId(?string $paymentId): static
-    {
-        $this->paymentId = $paymentId;
-        return $this;
-    }
-
-    public function getPaymentMethod(): string
-    {
-        return $this->paymentMethod;
-    }
-
-    public function setPaymentMethod(string $paymentMethod): static
-    {
-        $this->paymentMethod = $paymentMethod;
-        return $this;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

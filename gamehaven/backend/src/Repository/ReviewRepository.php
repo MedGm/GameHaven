@@ -3,9 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Review;
-use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\User;
+use App\Entity\Transaction;
 
 /**
  * @extends ServiceEntityRepository<Review>
@@ -17,56 +18,42 @@ class ReviewRepository extends ServiceEntityRepository
         parent::__construct($registry, Review::class);
     }
 
-    public function getAverageRating(User $seller): float
+    public function findByReviewer(User $reviewer): array
     {
-        $result = $this->createQueryBuilder('r')
-            ->select('AVG(r.rating)')
-            ->where('r.seller = :seller')
-            ->setParameter('seller', $seller)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return $result ?? 0.0;
-    }
-
-    public function getReviewStatistics(User $seller): array
-    {
-        $qb = $this->createQueryBuilder('r');
-        $ratings = $qb->select('r.rating, COUNT(r.id) as count')
-            ->where('r.seller = :seller')
-            ->setParameter('seller', $seller)
-            ->groupBy('r.rating')
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.reviewer = :reviewer')
+            ->setParameter('reviewer', $reviewer)
+            ->orderBy('r.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
-
-        return array_combine(
-            array_column($ratings, 'rating'),
-            array_column($ratings, 'count')
-        );
     }
 
-    //    /**
-    //     * @return Review[] Returns an array of Review objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findByReviewed(User $reviewed): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.reviewed = :reviewed')
+            ->setParameter('reviewed', $reviewed)
+            ->orderBy('r.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Review
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findByTransaction(Transaction $transaction): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.transaction = :transaction')
+            ->setParameter('transaction', $transaction)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getAverageRating(User $user): ?float
+    {
+        return $this->createQueryBuilder('r')
+            ->select('AVG(r.rating)')
+            ->andWhere('r.reviewed = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

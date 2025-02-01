@@ -4,8 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    stripe.secret_key: '%env(STRIPE_SECRET_KEY)%'
-    stripe.webhook_secret: '%env(STRIPE_WEBHOOK_SECRET)%'
+    avatar_directory: '%kernel.project_dir%/public/uploads/avatars'
+    game_images_directory: '%kernel.project_dir%/public/uploads/games'
 
 services:
     # default configuration for services in *this* file
@@ -24,28 +24,3 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-
-    App\Service\PaymentService:
-        autowire: true
-        autoconfigure: true
-        arguments:
-            $stripeSecretKey: '%stripe.secret_key%'
-            $stripeWebhookSecret: '%stripe.webhook_secret%'
-
-    # Remove the JWT authentication listener section
-    App\EventListener\AuthenticationListener: ~
-
-    App\EventListener\ApiResponseListener:
-        tags:
-            - { name: kernel.event_subscriber }
-
-    App\Security\CustomAuthenticationHandler:
-        arguments:
-            $tokenStorage: '@security.token_storage'
-        tags:
-            - { name: 'security.authentication.success_handler' }
-            - { name: 'security.authentication.failure_handler' }
-
-    App\EventSubscriber\LogoutSubscriber:
-        tags:
-            - { name: kernel.event_subscriber }

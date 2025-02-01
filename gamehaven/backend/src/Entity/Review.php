@@ -6,44 +6,50 @@ use App\Repository\ReviewRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Review
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    #[ORM\SequenceGenerator(sequenceName: 'review_id_seq')]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: Transaction::class)]
+    #[ORM\JoinColumn(name: 'transaction_id', referencedColumnName: 'id', nullable: false)]
+    private ?Transaction $transaction = null;
+
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'reviewer_id', referencedColumnName: 'id', nullable: false)]
     private ?User $reviewer = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $seller = null;
+    #[ORM\JoinColumn(name: 'reviewed_id', referencedColumnName: 'id', nullable: false)]
+    private ?User $reviewed = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $rating = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(type: 'text')]
     private ?string $comment = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column(type: 'boolean')]
-    private bool $isVerified = false;
-
-    #[ORM\Column(type: 'boolean')]
-    private bool $isFlagged = false;
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
-    }
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $createdAt = null;
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getTransaction(): ?Transaction
+    {
+        return $this->transaction;
+    }
+
+    public function setTransaction(?Transaction $transaction): static
+    {
+        $this->transaction = $transaction;
+        return $this;
     }
 
     public function getReviewer(): ?User
@@ -57,14 +63,14 @@ class Review
         return $this;
     }
 
-    public function getSeller(): ?User
+    public function getReviewed(): ?User
     {
-        return $this->seller;
+        return $this->reviewed;
     }
 
-    public function setSeller(?User $seller): static
+    public function setReviewed(?User $reviewed): static
     {
-        $this->seller = $seller;
+        $this->reviewed = $reviewed;
         return $this;
     }
 
@@ -84,42 +90,20 @@ class Review
         return $this->comment;
     }
 
-    public function setComment(?string $comment): static
+    public function setComment(string $comment): static
     {
         $this->comment = $comment;
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
     {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    public function isVerified(): bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setVerified(bool $isVerified): static
-    {
-        $this->isVerified = $isVerified;
-        return $this;
-    }
-
-    public function isFlagged(): bool
-    {
-        return $this->isFlagged;
-    }
-
-    public function setFlagged(bool $isFlagged): static
-    {
-        $this->isFlagged = $isFlagged;
-        return $this;
+        $this->createdAt = new \DateTime();
     }
 }

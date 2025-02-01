@@ -1,11 +1,19 @@
-controllers:
-    resource: ../src/Controller/
+api:
+    resource: '../src/Controller/'
+    type: attribute
+    exclude: 
+        - '../src/Controller/RegistrationController.php'
+        - '../src/Controller/SecurityController.php'
+        - '../src/Controller/DefaultController.php'
+
+authentication:
+    resource: '../src/Controller/SecurityController.php'
     type: attribute
 
-logout:
-    path: /api/logout
-    methods: [GET, POST]
+registration:
+    resource: '../src/Controller/RegistrationController.php'
+    type: attribute
 
-logout_success:
-    path: /api/logout/success
-    methods: [GET, POST]
+app_verify_email:
+    path: /verify/email
+    controller: App\Controller\RegistrationController::verifyUserEmail

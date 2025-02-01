@@ -3,75 +3,52 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(type: 'string', length: 180, unique: true, nullable: false)]
+    private ?string $username = null;
+
+    #[ORM\Column(length: 100)]
     private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
-    #[ORM\Column]
-    private array $roles = [];
-
-    /**
-     * @var string The hashed password
-     */
-    #[ORM\Column]
-    private ?string $password = null;
-
     #[ORM\Column(length: 255)]
-    private ?string $username = null;
+    private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $avatarUrl = null;
 
+    #[ORM\Column(length: 20)]
+    private string $role = 'ROLE_USER';
+
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $lastLogin = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $isActive = null;
+
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column(type: 'boolean')]
-    private bool $isActive = true;
-
-    #[ORM\OneToMany(mappedBy: 'seller', targetEntity: GameListing::class)]
-    private Collection $listings;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Wishlist::class)]
-    private Collection $wishlists;
-
-    #[ORM\OneToMany(mappedBy: 'reviewer', targetEntity: Review::class)]
-    private Collection $givenReviews;
-
-    #[ORM\OneToMany(mappedBy: 'seller', targetEntity: Review::class)]
-    private Collection $receivedReviews;
-
-    #[ORM\OneToMany(mappedBy: 'buyer', targetEntity: Transaction::class)]
-    private Collection $purchases;
-
-    #[ORM\OneToMany(mappedBy: 'seller', targetEntity: Transaction::class)]
-    private Collection $sales;
+    private bool $isVerified = false;
 
     public function __construct()
     {
-        $this->listings = new ArrayCollection();
-        $this->wishlists = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->givenReviews = new ArrayCollection();
-        $this->receivedReviews = new ArrayCollection();
-        $this->purchases = new ArrayCollection();
-        $this->sales = new ArrayCollection();
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -87,55 +64,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
-        return $this;
-    }
-
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
-
-    /**
-     * @see UserInterface
-     *
-     * @return list<string>
-     */
-    public function getRoles(): array
-    {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
-    }
-
-    /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): static
-    {
-        $this->password = $password;
 
         return $this;
     }
@@ -162,88 +90,81 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getRole(): string
+    {
+        return $this->role;
+    }
+
+    public function setRole(string $role): static
+    {
+        $this->role = $role;
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return [$this->role];
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function getLastLogin(): ?\DateTimeInterface
     {
-        $this->createdAt = $createdAt;
+        return $this->lastLogin;
+    }
+
+    public function setLastLogin(?\DateTimeInterface $lastLogin): static
+    {
+        $this->lastLogin = $lastLogin;
         return $this;
     }
 
-    public function isActive(): bool
+    public function getIsActive(): ?\DateTimeInterface
     {
         return $this->isActive;
     }
 
-    public function setActive(bool $isActive): static
+    public function setIsActive(?\DateTimeInterface $isActive): static
     {
         $this->isActive = $isActive;
         return $this;
     }
 
-    /**
-     * @return Collection<int, GameListing>
-     */
-    public function getListings(): Collection
+    public function getPassword(): ?string
     {
-        return $this->listings;
+        return $this->password;
     }
 
-    public function addListing(GameListing $listing): static
+    public function setPassword(string $password): static
     {
-        if (!$this->listings->contains($listing)) {
-            $this->listings->add($listing);
-            $listing->setSeller($this);
-        }
+        $this->password = $password;
+
         return $this;
     }
 
-    public function removeListing(GameListing $listing): static
-    {
-        if ($this->listings->removeElement($listing)) {
-            if ($listing->getSeller() === $this) {
-                $listing->setSeller(null);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Wishlist>
-     */
-    public function getWishlists(): Collection
-    {
-        return $this->wishlists;
-    }
-
-    public function addWishlist(Wishlist $wishlist): static
-    {
-        if (!$this->wishlists->contains($wishlist)) {
-            $this->wishlists->add($wishlist);
-            $wishlist->setUser($this);
-        }
-        return $this;
-    }
-
-    public function removeWishlist(Wishlist $wishlist): static
-    {
-        if ($this->wishlists->removeElement($wishlist)) {
-            if ($wishlist->getUser() === $this) {
-                $wishlist->setUser(null);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * @see UserInterface
-     */
     public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+    
+    public function getUserIdentifier(): string
+    {
+    return $this->username;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
     }
 }

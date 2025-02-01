@@ -1,33 +1,74 @@
 security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
-        App\Entity\User: 'auto'
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                property: username  # Changed from email to username
+        # used to reload user from session & other features (e.g. switch_user)
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                check_path: api_login
+                username_path: username  # Changed from email to username
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            custom_authenticator: App\Security\LoginAuthAuthenticator
+            jwt: ~
+            logout:
+                path: app_api_logout
         main:
             lazy: true
             provider: app_user_provider
-            custom_authenticator: App\Security\CustomAuthenticationHandler
+            custom_authenticator: App\Security\LoginAuthAuthenticator
             logout:
-                path: /api/logout
-                delete_cookies: ['PHPSESSID']
-                invalidate_session: true
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
+
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /
+                # by default, the feature is enabled by checking a checkbox in the
+                # login form, uncomment the following line to always enable it.
+                #always_remember_me: true
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#the-firewall
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/users/register, roles: PUBLIC_ACCESS }
-        - { path: ^/api/logout, roles: PUBLIC_ACCESS }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/verify/email, roles: PUBLIC_ACCESS }
+        - { path: ^/api/games$, methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/games/platform, methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/games/genre, methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/games/search, methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/listings$, methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/listings/\d+$, methods: [GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/users$, methods: [POST], roles: PUBLIC_ACCESS }
+        - { path: '/api/csrf-token', roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
@@ -37,8 +78,8 @@ when@test:
             # important to generate secure password hashes. In tests however, secure hashes
             # are not important, waste resources and increase test times. The following
             # reduces the work factor to the lowest possible values.
-            App\Entity\User:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4
-                time_cost: 3
-                memory_cost: 10
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon

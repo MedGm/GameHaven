@@ -1,0 +1,360 @@
+:root {
+  --primary-black: #0a0a0f;
+  --secondary-black: #16161e;
+  --accent-dark: #1e1e2a;
+  --neon-purple: #9d4edd;
+  --neon-blue: #4361ee;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --gradient-dark: linear-gradient(135deg, var(--primary-black) 0%, var(--accent-dark) 100%);
+  --gradient-accent: linear-gradient(45deg, var(--neon-purple), var(--neon-blue));
+}
+
+.profile-page {
+  min-height: 100vh;
+  background: var(--gradient-dark);
+  color: var(--text-primary);
+}
+
+.profile-container {
+  padding: 100px 5% 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.profile-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.profile-header p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.profile-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  padding: 3rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(200px, 300px) 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.avatar-section {
+  text-align: center;
+}
+
+.avatar-preview {
+  width: 200px;
+  height: 200px;
+  border-radius: 20px;
+  margin: 0 auto 1.5rem;
+  border: 3px solid transparent;
+  background: 
+    linear-gradient(var(--secondary-black), var(--secondary-black)) padding-box,
+    var(--gradient-accent) border-box;
+  box-shadow: 0 0 20px rgba(157, 78, 221, 0.2);
+  transition: transform 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.avatar-preview:hover {
+  transform: scale(1.05);
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-dark);
+  color: var(--text-secondary);
+  font-size: 4rem;
+}
+
+.avatar-upload-btn {
+  background: var(--gradient-accent);
+  color: var(--text-primary);
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-upload-btn input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-upload-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.avatar-upload-progress-bar {
+  height: 100%;
+  background: var(--secondary-purple);
+  transition: width 0.3s ease;
+}
+
+.avatar-upload-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(157, 78, 221, 0.4);
+}
+
+.avatar-upload-btn i {
+  font-size: 1.2rem;
+}
+
+.info-group {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.info-group:hover {
+  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(157, 78, 221, 0.3);
+}
+
+.info-group label {
+  color: var(--neon-purple);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.info-group p {
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.save-button {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 2rem;
+  background: linear-gradient(45deg, var(--primary-purple), var(--secondary-purple));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.save-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(157, 78, 221, 0.4);
+}
+
+.save-button i {
+  font-size: 1.2rem;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left-color: var(--secondary-purple);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Add delete account section styles */
+.danger-zone {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.danger-zone h3 {
+  color: #ff4d4d;
+  margin-bottom: 1rem;
+}
+
+.delete-account-btn {
+  background: rgba(255, 77, 77, 0.1);
+  color: #ff4d4d;
+  border: 1px solid #ff4d4d;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.delete-account-btn:hover {
+  background: rgba(255, 77, 77, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Delete confirmation modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: var(--primary-black);
+  padding: 2rem;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid rgba(255, 77, 77, 0.3);
+  box-shadow: 0 0 20px rgba(255, 77, 77, 0.2);
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+  color: #ff4d4d;
+  margin-bottom: 0.5rem;
+}
+
+.modal-body {
+  margin-bottom: 1.5rem;
+}
+
+.modal-body input {
+  width: 100%;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+}
+
+.modal-footer button {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.confirm-delete {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+}
+
+.cancel-delete {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.confirm-delete:hover {
+  background: #ff3333;
+}
+
+.cancel-delete:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Add validation styles */
+.file-validation-error {
+  color: #ff4d4d;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Add responsive design */
+@media (max-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .profile-card {
+    padding: 2rem;
+  }
+
+  .profile-header h1 {
+    font-size: 2rem;
+  }
+}

@@ -1,0 +1,72 @@
+.wishlist-page {
+  min-height: 100vh;
+  background: var(--gradient-dark);
+  color: var(--text-primary);
+  padding: 80px 2rem 2rem; /* Increase top padding to account for navbar */
+}
+
+.wishlist-page h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-top: 2rem; /* Add top margin */
+}
+
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 0 5%;
+}
+
+.wishlist-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.wishlist-item:hover {
+  transform: translateY(-5px);
+}
+
+.wishlist-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.item-info {
+  padding: 1.5rem;
+}
+
+.item-info h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.item-info p {
+  color: var(--text-secondary);
+  margin: 0.3rem 0;
+}
+
+.remove-button {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.2);
+  border-radius: 8px;
+  color: #ff4444;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-button:hover {
+  background: rgba(255, 0, 0, 0.2);
+}

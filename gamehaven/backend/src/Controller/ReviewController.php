@@ -3,126 +3,125 @@
 namespace App\Controller;
 
 use App\Entity\Review;
-use App\Entity\User;
+use App\Repository\ReviewRepository;
+use App\Repository\UserRepository;
+use App\Repository\TransactionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api')]
-class ReviewController extends AbstractController
+#[Route('/api/reviews')]
+final class ReviewController extends AbstractController
 {
     public function __construct(
+        private ReviewRepository $reviewRepository,
+        private UserRepository $userRepository,
+        private TransactionRepository $transactionRepository,
         private EntityManagerInterface $entityManager
     ) {}
 
-    #[Route('/reviews', name: 'create_review', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
+    #[Route('', name: 'get_all_reviews', methods: ['GET'])]
+    public function getAllReviews(): JsonResponse
+    {
+        $reviews = $this->reviewRepository->findAll();
+        
+        $formattedReviews = array_map(function($review) {
+            return [
+                'id' => $review->getId(),
+                'transaction_id' => $review->getTransaction()->getId(),
+                'reviewer' => [
+                    'id' => $review->getReviewer()->getId(),
+                    'username' => $review->getReviewer()->getUsername()
+                ],
+                'reviewed' => [
+                    'id' => $review->getReviewed()->getId(),
+                    'username' => $review->getReviewed()->getUsername()
+                ],
+                'rating' => $review->getRating(),
+                'comment' => $review->getComment(),
+                'created_at' => $review->getCreatedAt()->format('Y-m-d H:i:s')
+            ];
+        }, $reviews);
+
+        return $this->json($formattedReviews);
+    }
+
+    #[Route('/{id}', name: 'get_one_review', methods: ['GET'])]
+    public function getOneReview(int $id): JsonResponse
+    {
+        $review = $this->reviewRepository->find($id);
+        
+        if (!$review) {
+            return $this->json(['error' => 'Review not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json([
+            'id' => $review->getId(),
+            'transaction_id' => $review->getTransaction()->getId(),
+            'reviewer' => [
+                'id' => $review->getReviewer()->getId(),
+                'username' => $review->getReviewer()->getUsername()
+            ],
+            'reviewed' => [
+                'id' => $review->getReviewed()->getId(),
+                'username' => $review->getReviewed()->getUsername()
+            ],
+            'rating' => $review->getRating(),
+            'comment' => $review->getComment(),
+            'created_at' => $review->getCreatedAt()->format('Y-m-d H:i:s')
+        ]);
+    }
+
+    #[Route('', name: 'create_review', methods: ['POST'])]
+    public function createReview(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
-        if (!isset($data['seller_id']) || !isset($data['rating'])) {
-            return $this->json(['error' => 'seller_id and rating are required'], 400);
+
+        // Validate required fields
+        if (!isset($data['transaction_id']) || !isset($data['reviewer_id']) || 
+            !isset($data['rating']) || !isset($data['comment'])) {
+            return $this->json(['error' => 'Missing required fields'], Response::HTTP_BAD_REQUEST);
         }
 
-        $seller = $this->entityManager->getRepository(User::class)->find($data['seller_id']);
-        if (!$seller) {
-            return $this->json(['error' => 'Seller not found'], 404);
+        // Validate rating range
+        if ($data['rating'] < 1 || $data['rating'] > 5) {
+            return $this->json(['error' => 'Rating must be between 1 and 5'], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($seller === $this->getUser()) {
-            return $this->json(['error' => 'Cannot review yourself'], 400);
+        $transaction = $this->transactionRepository->find($data['transaction_id']);
+        $reviewer = $this->userRepository->find($data['reviewer_id']);
+
+        if (!$transaction || !$reviewer) {
+            return $this->json(['error' => 'Transaction or User not found'], Response::HTTP_NOT_FOUND);
         }
 
+        // Create new review
         $review = new Review();
-        $review->setReviewer($this->getUser());
-        $review->setSeller($seller);
+        $review->setTransaction($transaction);
+        $review->setReviewer($reviewer);
+        $review->setReviewed($transaction->getSeller() === $reviewer ? $transaction->getBuyer() : $transaction->getSeller());
         $review->setRating($data['rating']);
-        $review->setComment($data['comment'] ?? null);
-        
+        $review->setComment($data['comment']);
+
         $this->entityManager->persist($review);
         $this->entityManager->flush();
 
         return $this->json([
             'message' => 'Review created successfully',
-            'review' => [
-                'id' => $review->getId(),
-                'rating' => $review->getRating(),
-                'comment' => $review->getComment()
-            ]
-        ], 201);
+            'review_id' => $review->getId()
+        ], Response::HTTP_CREATED);
     }
 
-    #[Route('/users/{id}/reviews', name: 'get_user_reviews', methods: ['GET'])]
-    public function getUserReviews(int $id): JsonResponse
+    #[Route('/{id}', name: 'delete_review', methods: ['DELETE'])]
+    public function deleteReview(int $id): JsonResponse
     {
-        $seller = $this->entityManager->getRepository(User::class)->find($id);
-        if (!$seller) {
-            return $this->json(['error' => 'User not found'], 404);
-        }
-
-        $reviews = $this->entityManager->getRepository(Review::class)->findBy([
-            'seller' => $seller
-        ]);
-
-        return $this->json([
-            'reviews' => array_map(fn($review) => [
-                'id' => $review->getId(),
-                'rating' => $review->getRating(),
-                'comment' => $review->getComment(),
-                'created_at' => $review->getCreatedAt()->format('Y-m-d H:i:s'),
-                'reviewer' => [
-                    'id' => $review->getReviewer()->getId(),
-                    'username' => $review->getReviewer()->getUsername()
-                ]
-            ], $reviews)
-        ]);
-    }
-
-    #[Route('/reviews/{id}', name: 'update_review', methods: ['PUT'])]
-    public function update(int $id, Request $request): JsonResponse
-    {
-        $review = $this->entityManager->getRepository(Review::class)->find($id);
-        if (!$review) {
-            return $this->json(['error' => 'Review not found'], 404);
-        }
-
-        if ($review->getReviewer() !== $this->getUser()) {
-            return $this->json(['error' => 'Not authorized'], 403);
-        }
-
-        $data = json_decode($request->getContent(), true);
+        $review = $this->reviewRepository->find($id);
         
-        if (isset($data['rating'])) {
-            $review->setRating($data['rating']);
-        }
-        if (isset($data['comment'])) {
-            $review->setComment($data['comment']);
-        }
-
-        $this->entityManager->flush();
-
-        return $this->json([
-            'message' => 'Review updated successfully',
-            'review' => [
-                'id' => $review->getId(),
-                'rating' => $review->getRating(),
-                'comment' => $review->getComment()
-            ]
-        ]);
-    }
-
-    #[Route('/reviews/{id}', name: 'delete_review', methods: ['DELETE'])]
-    public function delete(int $id): JsonResponse
-    {
-        $review = $this->entityManager->getRepository(Review::class)->find($id);
         if (!$review) {
-            return $this->json(['error' => 'Review not found'], 404);
-        }
-
-        if ($review->getReviewer() !== $this->getUser()) {
-            return $this->json(['error' => 'Not authorized'], 403);
+            return $this->json(['error' => 'Review not found'], Response::HTTP_NOT_FOUND);
         }
 
         $this->entityManager->remove($review);
