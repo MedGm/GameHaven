@@ -32,6 +32,7 @@ const Navbar = ({ active }) => {
       <div className="nav-links">
         <Link to="/games" className={active === 'games' ? 'active' : ''}>Games</Link>
         <Link to="/marketplace" className={active === 'marketplace' ? 'active' : ''}>Marketplace</Link>
+        <Link to="/chat" className={active === 'chat' ? 'active' : ''}>Chat</Link>
         <Link to="/wishlist" className={active === 'wishlist' ? 'active' : ''}>Wishlist</Link>
         <Link to="/reviews" className={active === 'reviews' ? 'active' : ''}>Reviews</Link>
         <Link to="/profile" className={active === 'profile' ? 'active' : ''}>Profile</Link>

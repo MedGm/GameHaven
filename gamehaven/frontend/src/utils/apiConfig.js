@@ -6,16 +6,9 @@ export const getApiUrl = (endpoint) => {
 };
 
 export const getAssetUrl = (path) => {
-  if (!path) return null;
-  
-  // If path is already a full URL
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-  
-  // Clean the path and ensure it starts with /uploads/
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${API_BASE_URL}${cleanPath}`;
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('//')) return path;  // NEW: Return absolute URLs as-is
+  return `${process.env.REACT_APP_API_BASE_URL}/${path}`;
 };
 
 // Debug helper
