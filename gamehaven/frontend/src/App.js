@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Register from './components/Register';
@@ -5,10 +6,11 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import Games from './components/Games';
 import AddGame from './components/AddGame';
+import ReviewPage from './components/ReviewPage'; 
+import WishlistPage from './components/WishlistPage';
 import Marketplace from './components/Marketplace';
 import TransactionPage from './components/TransactionPage';
-import WishlistPage from './components/WishlistPage';
-import ReviewPage from './components/ReviewPage';
+import Chat from './components/Chat';
 import './App.css';
 
 function App() {
@@ -23,9 +25,10 @@ function App() {
           <Route path="/games" element={<Games />} />
           <Route path="/games/add" element={<AddGame />} />
           <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/transaction/:listingId" element={<TransactionPage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/reviews" element={<ReviewPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/transaction/:id" element={<TransactionPage />} />
+          <Route path="/chat" element={<Chat />} />
           <Route path="/" element={<Navigate to="/home" />} />
         </Routes>
       </div>

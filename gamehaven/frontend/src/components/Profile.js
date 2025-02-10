@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 import { getAuthUser } from '../utils/auth';
 import { getApiUrl, logApiUrl, getAssetUrl } from '../utils/apiConfig';
 import './Profile.css';
-import Navbar from './Navbar';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -15,16 +15,6 @@ const Profile = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
-
-  const getAvatarUrl = (avatarPath) => {
-    // If the path already includes the full URL, return it
-    if (avatarPath?.startsWith('http') || avatarPath?.startsWith('//')) {
-      return avatarPath.startsWith('//') ? `https:${avatarPath}` : avatarPath;
-    }
-    
-    // Otherwise, construct the full URL using the API base URL
-    return avatarPath ? `${process.env.REACT_APP_API_BASE_URL}/${avatarPath}` : null;
-  };
 
   useEffect(() => {
     const user = getAuthUser();
@@ -70,7 +60,7 @@ const Profile = () => {
       setUserData(data);
       if (data.avatar_url) {
         // Convert relative path to full URL
-        setAvatarPreview(getAvatarUrl(data.avatar_url));
+        setAvatarPreview(getAssetUrl(data.avatar_url));
       }
     } catch (error) {
       console.error('Profile error:', error);
@@ -216,15 +206,7 @@ const Profile = () => {
             <div className="avatar-section">
               <div className="avatar-preview">
                 {avatarPreview ? (
-                  <img 
-                    src={avatarPreview} 
-                    alt="Profile"
-                    onError={(e) => {
-                      console.error('Avatar load error:', e);
-                      e.target.onerror = null;
-                      e.target.src = `${process.env.REACT_APP_API_BASE_URL}/uploads/avatars/default-avatar.jpg`;
-                    }}
-                  />
+                  <img src={avatarPreview} alt="Profile" />
                 ) : (
                   <div className="avatar-placeholder">
                     <i className="fas fa-user"></i>

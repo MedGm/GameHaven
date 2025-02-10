@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Home.css';
 import Navbar from './Navbar';
+import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();

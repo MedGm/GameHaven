@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApiUrl, getAssetUrl } from '../utils/apiConfig';
-import Navbar from './Navbar';
 import './Games.css';
+import Navbar from './Navbar';
 
 const Games = () => {
   const navigate = useNavigate();

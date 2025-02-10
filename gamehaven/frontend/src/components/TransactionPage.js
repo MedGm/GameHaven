@@ -12,7 +12,7 @@ const DEFAULT_GAME_IMAGE = `${process.env.REACT_APP_API_BASE_URL}/uploads/placeh
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
 const TransactionPage = () => {
-  const { listingId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ const TransactionPage = () => {
     const fetchListing = async () => {
       try {
         const token = localStorage.getItem('jwt_token');
-        const response = await fetch(getApiUrl(`listings/${listingId}`), {
+        const response = await fetch(getApiUrl(`listings/${id}`), {
           headers: {
             'Authorization': `Bearer ${token}`,
           }
@@ -52,7 +52,7 @@ const TransactionPage = () => {
     };
 
     fetchListing();
-  }, [listingId]);
+  }, [id]);
 
   const handlePaymentSuccess = (paymentIntent) => {
     alert('Payment successful!');
