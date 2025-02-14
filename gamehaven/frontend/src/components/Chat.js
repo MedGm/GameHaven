@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import { useNavigate } from 'react-router-dom';
 import { getApiUrl } from '../utils/apiConfig';
 import Navbar from './Navbar';
@@ -9,7 +11,10 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [error, setError] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
   const token = localStorage.getItem('jwt_token');
 
   const scrollToBottom = () => {
@@ -52,29 +57,97 @@ const Chat = () => {
     scrollToBottom();
   }, [messages]);
 
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setError('File size must be less than 5MB');
+        return;
+      }
+      
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      if (!['pdf', 'docx'].includes(fileExtension)) {
+        setError('Only PDF and DOCX files are allowed');
+        return;
+      }
+      
+      setSelectedFile(file);
+      setError(''); // Clear any previous errors
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() && !selectedFile) return;
+
+    const formData = new FormData();
+    if (newMessage.trim()) {
+      formData.append('message', newMessage);
+    }
+    if (selectedFile) {
+      formData.append('file', selectedFile);
+    }
+
+    setNewMessage('');
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
 
     try {
       const response = await fetch(getApiUrl('chat/messages'), {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ message: newMessage })
+        body: formData
       });
 
-      if (!response.ok) throw new Error('Failed to send message');
+      if (!response.ok) {
+        setError('Failed to send message');
+        return;
+      }
 
       const data = await response.json();
       setMessages(prev => [...prev, data]);
-      setNewMessage('');
     } catch (error) {
-      setError('Failed to send message');
       console.error('Error:', error);
     }
+  };
+
+  const handleEmojiSelect = (emoji) => {
+    setNewMessage(prev => prev + emoji.native);
+    setShowEmojiPicker(false);
+  };
+
+  const renderMessageContent = (message) => {
+    return (
+      <>
+        {message.message && <p className="message-text">{message.message}</p>}
+        {message.fileUrl && (
+          <div className="message-attachment">
+            {message.fileType?.startsWith('image/') ? (
+              <img 
+                src={message.fileUrl} 
+                alt="attachment" 
+                className="message-image"
+                onClick={() => window.open(message.fileUrl, '_blank')}
+              />
+            ) : (
+              <a 
+                href={message.fileUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="file-attachment"
+              >
+                <i className="fas fa-file"></i>
+                Download Attachment
+              </a>
+            )}
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
@@ -105,7 +178,7 @@ const Chat = () => {
                     {new Date(message.createdAt).toLocaleString()}
                   </span>
                 </div>
-                <p className="message-text">{message.message}</p>
+                {renderMessageContent(message)}
               </div>
             </div>
           ))}
@@ -113,13 +186,53 @@ const Chat = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="message-form">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type your message..."
-            className="message-input"
-          />
+          <div className="input-container">
+            <button 
+              type="button" 
+              className="emoji-button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            >
+              <i className="far fa-smile"></i>
+            </button>
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="message-input"
+            />
+            <label className="file-input-label">
+              <i className="fas fa-paperclip"></i>
+              <input
+                type="file"
+                onChange={handleFileSelect}
+                ref={fileInputRef}
+                className="file-input"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              />
+            </label>
+            {selectedFile && (
+              <div className="selected-file">
+                <span>{selectedFile.name}</span>
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedFile(null)}
+                  className="remove-file"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+            )}
+            {showEmojiPicker && (
+              <div className="emoji-picker-container">
+                <Picker 
+                  data={data} 
+                  onEmojiSelect={handleEmojiSelect}
+                  theme="dark"
+                />
+              </div>
+            )}
+          </div>
           <button type="submit" className="send-button">
             <i className="fas fa-paper-plane"></i>
           </button>

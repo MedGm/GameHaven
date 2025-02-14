@@ -123,3 +123,114 @@
 .messages-container::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+.input-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  gap: 10px;
+}
+
+.emoji-button {
+  background: none;
+  border: none;
+  color: #7289da;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 0 10px;
+  transition: color 0.3s ease;
+}
+
+.emoji-button:hover {
+  color: #5b6eae;
+}
+
+.emoji-picker-container {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 10px;
+  z-index: 1000;
+}
+
+.emoji-picker-container em-emoji-picker {
+  height: 350px;
+  --background-rgb: 44, 44, 44;
+  --border-radius: 8px;
+  --category-icon-size: 24px;
+}
+
+.file-input-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  color: #7289da;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.file-input-label:hover {
+  color: #5b6eae;
+}
+
+.file-input {
+  display: none;
+}
+
+.selected-file {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: #363636;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remove-file {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.remove-file:hover {
+  color: #ff4444;
+}
+
+.message-attachment {
+  margin-top: 8px;
+}
+
+.message-image {
+  max-width: 300px;
+  max-height: 200px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.message-image:hover {
+  transform: scale(1.05);
+}
+
+.file-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #2c2c2c;
+  border-radius: 4px;
+  color: #7289da;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.file-attachment:hover {
+  background: #363636;
+}

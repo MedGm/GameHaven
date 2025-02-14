@@ -32,9 +32,17 @@ security:
             logout:
                 path: app_api_logout
         main:
+            pattern: ^/
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\LoginAuthAuthenticator
+            entry_point: App\Security\AuthenticationEntryPoint
+            json_login:
+                check_path: api_login
+                username_path: username
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
             logout:
                 path: app_logout
                 # where to redirect after logout
@@ -57,6 +65,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        - { path: ^/verify/email, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }

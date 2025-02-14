@@ -28,3 +28,7 @@
 ###< lexik/jwt-authentication-bundle ###
 
 /public/uploads/
+
+# Uploaded files
+/public/uploads/chat/*
+!/public/uploads/chat/.gitkeep

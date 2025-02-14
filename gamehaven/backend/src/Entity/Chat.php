@@ -23,6 +23,12 @@ class Chat
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $fileUrl = null;
+
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $fileType = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
@@ -58,5 +64,27 @@ class Chat
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
+    }
+
+    public function getFileUrl(): ?string
+    {
+        return $this->fileUrl;
+    }
+
+    public function setFileUrl(?string $fileUrl): self
+    {
+        $this->fileUrl = $fileUrl;
+        return $this;
+    }
+
+    public function getFileType(): ?string
+    {
+        return $this->fileType;
+    }
+
+    public function setFileType(?string $fileType): self
+    {
+        $this->fileType = $fileType;
+        return $this;
     }
 }
