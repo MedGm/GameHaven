@@ -15,6 +15,8 @@ const Profile = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  const [verificationStatus, setVerificationStatus] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState('');
 
   useEffect(() => {
     const user = getAuthUser();
@@ -58,6 +60,7 @@ const Profile = () => {
       const data = await response.json();
       console.log('Received user data:', data);
       setUserData(data);
+      setVerificationStatus(data.is_verified);
       if (data.avatar_url) {
         // Convert relative path to full URL
         setAvatarPreview(getAssetUrl(data.avatar_url));
@@ -182,6 +185,40 @@ const Profile = () => {
     navigate('/login');
   };
 
+  const handleResendVerification = async () => {
+    try {
+      const token = localStorage.getItem('jwt_token');
+      const response = await fetch(getApiUrl('verify/resend'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setVerificationMessage('Verification email sent! Please check your inbox.');
+      } else {
+        if (data.message === 'Email already verified') {
+          setVerificationStatus(true); // Update local state if server says user is verified
+          setVerificationMessage('');
+        } else {
+          setError(data.message || 'Failed to resend verification email');
+        }
+      }
+
+      // Refresh user data after attempting verification
+      const userId = localStorage.getItem('user_id');
+      if (userId) {
+        fetchUserData(userId);
+      }
+    } catch (error) {
+      setError('Failed to resend verification email');
+    }
+  };
+
   if (!userData) {
     return <div className="profile-loading">
       <div className="loading-spinner"></div>
@@ -234,6 +271,33 @@ const Profile = () => {
                 <label>Email</label>
                 <p>{userData.email}</p>
               </div>
+              <div className="info-group">
+                <label>Email Verification Status</label>
+                <div className="verification-status">
+                  {verificationStatus ? (
+                    <span className="verified">
+                      <i className="fas fa-check-circle"></i> Verified
+                    </span>
+                  ) : (
+                    <div className="unverified">
+                      <span>
+                        <i className="fas fa-exclamation-circle"></i> Not Verified
+                      </span>
+                      <button 
+                        className="resend-verification-btn"
+                        onClick={handleResendVerification}
+                      >
+                        Resend Verification Email
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {verificationMessage && (
+                <div className="verification-message success">
+                  {verificationMessage}
+                </div>
+              )}
               {/* Add more user info sections as needed */}
             </div>
           </div>

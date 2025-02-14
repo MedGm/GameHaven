@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verification Failed - GameHaven</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: #2c2c2c;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        .error-icon {
+            color: #f44336;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .title {
+            color: #f44336;
+            margin-bottom: 1rem;
+        }
+        .message {
+            margin-bottom: 2rem;
+            color: #cccccc;
+        }
+        .button {
+            background: #7289da;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+        .button:hover {
+            background: #5b6eae;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h1 class="title">Verification Failed</h1>
+        <p class="message">{{ error }}</p>
+        <a href="http://localhost:3000/profile" class="button">Return to Profile</a>
+    </div>
+</body>
+</html>

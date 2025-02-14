@@ -38,7 +38,8 @@ class UserController extends AbstractController
             'id' => $user->getId(),
             'username' => $user->getUsername(),
             'email' => $user->getEmail(),
-            'avatar_url' => $user->getAvatarUrl() ? $this->getFullAssetUrl($request, $user->getAvatarUrl()) : null
+            'avatar_url' => $user->getAvatarUrl() ? $this->getFullAssetUrl($request, $user->getAvatarUrl()) : null,
+            'is_verified' => $user->isVerified() // Include verification status
         ];
 
         return $this->json($userData);

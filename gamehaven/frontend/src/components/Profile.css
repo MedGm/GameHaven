@@ -358,3 +358,57 @@
     font-size: 2rem;
   }
 }
+
+/* Add verification status styles */
+.verification-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.verified {
+  color: #4CAF50;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.unverified {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.unverified span {
+  color: #f44336;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.resend-verification-btn {
+  background: #7289da;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background 0.3s ease;
+}
+
+.resend-verification-btn:hover {
+  background: #5b6eae;
+}
+
+.verification-message {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.verification-message.success {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+  border: 1px solid #4CAF50;
+}

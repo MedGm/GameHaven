@@ -1,11 +1,117 @@
-<h1>Hi! Please confirm your email!</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #2c2c2c;
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid #7289da;
+            box-shadow: 0 0 20px rgba(114, 137, 218, 0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            color: #7289da;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 24px;
+            color: #7289da;
+            margin: 20px 0;
+        }
+        .message {
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #cccccc;
+        }
+        .verify-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #7289da, #5b6eae);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .verify-button:hover {
+            background: linear-gradient(45deg, #5b6eae, #4c5c9e);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #404040;
+            color: #888888;
+            font-size: 14px;
+        }
+        .game-icons {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 24px;
+        }
+        .expiry-notice {
+            font-size: 14px;
+            color: #888888;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">🎮 GameHaven</div>
+            <div class="game-icons">🎮 🎲 🏆 🎯</div>
+        </div>
+        
+        <h1 class="title">Welcome to the Game, {{ user.username }}!</h1>
+        
+        <div class="message">
+            <p>Your quest to join the GameHaven community is almost complete! Just one more achievement to unlock:</p>
+            
+            <p>Click the button below to verify your email and gain full access to:</p>
+            <ul>
+                <li>🎮 Game discussions and reviews</li>
+                <li>🤝 Trading with other players</li>
+                <li>💬 Real-time chat with gamers</li>
+                <li>🏆 Special community events</li>
+            </ul>
+        </div>
 
-<p>
-    Please confirm your email address by clicking the following link: <br><br>
-    <a href="{{ signedUrl|raw }}">Confirm my Email</a>.
-    This link will expire in {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
-</p>
+        <div style="text-align: center;">
+            <a href="{{ signedUrl }}" class="verify-button">
+                🎯 Verify Email & Join the Game
+            </a>
+        </div>
 
-<p>
-    Cheers!
-</p>
+        <div class="expiry-notice">
+            This verification link will expire in {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
+        </div>
+
+        <div class="footer">
+            <p>This email was sent from GameHaven. If you didn't create an account, you can safely ignore this email.</p>
+            <p>Game On! 🎮</p>
+        </div>
+    </div>
+</body>
+</html>

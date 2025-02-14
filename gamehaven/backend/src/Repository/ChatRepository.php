@@ -21,7 +21,7 @@ class ChatRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->leftJoin('c.user', 'u')
             ->addSelect('u')
-            ->orderBy('c.createdAt', 'DESC')
+            ->orderBy('c.createdAt', 'ASC')  // Changed from DESC to ASC
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
