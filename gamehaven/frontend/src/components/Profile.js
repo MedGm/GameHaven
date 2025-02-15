@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import { getAuthUser } from '../utils/auth';
 import { getApiUrl, logApiUrl, getAssetUrl } from '../utils/apiConfig';
@@ -18,17 +18,7 @@ const Profile = () => {
   const [verificationStatus, setVerificationStatus] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState('');
 
-  useEffect(() => {
-    const user = getAuthUser();
-    if (!user || !user.id) {
-      console.log('No user data found, redirecting to login');
-      navigate('/login');
-      return;
-    }
-    fetchUserData(user.id);
-  }, [navigate]);
-
-  const fetchUserData = async (userId) => {
+  const fetchUserData = useCallback(async (userId) => {
     try {
       const token = localStorage.getItem('jwt_token');
       if (!token || !userId) {
@@ -72,7 +62,17 @@ const Profile = () => {
         navigate('/login');
       }
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    const user = getAuthUser();
+    if (!user || !user.id) {
+      console.log('No user data found, redirecting to login');
+      navigate('/login');
+      return;
+    }
+    fetchUserData(user.id);
+  }, [fetchUserData, navigate]);
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -177,12 +177,6 @@ const Profile = () => {
     } catch (error) {
       setDeleteError('Failed to delete account');
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('user_id');
-    navigate('/login');
   };
 
   const handleResendVerification = async () => {

@@ -47,7 +47,7 @@ const apiClient = async (url, options = {}) => {
     console.log('Response status:', response.status); // Debug log
     
     if (response.status === 401) {
-      console.log('Authentication failed, clearing tokens'); // Debug log
+      console.log('Authentication failed, clearing tokens');
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('user_id');
       window.location.href = '/login';

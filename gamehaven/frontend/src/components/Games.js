@@ -4,6 +4,8 @@ import { getApiUrl, getAssetUrl } from '../utils/apiConfig';
 import './Games.css';
 import Navbar from './Navbar';
 
+const DEFAULT_PLACEHOLDER = "https://via.placeholder.com/300x400";
+
 const Games = () => {
   const navigate = useNavigate();
   const [games, setGames] = useState([]);
@@ -13,7 +15,9 @@ const Games = () => {
   const [platform, setPlatform] = useState('');
   const [genre, setGenre] = useState('');
 
-  const DEFAULT_PLACEHOLDER = `${process.env.REACT_APP_API_BASE_URL}/uploads/placeholder-game.jpg`;
+  const handleImageError = useCallback((e) => {
+    e.target.src = DEFAULT_PLACEHOLDER;
+  }, []); // Remove DEFAULT_PLACEHOLDER from dependencies since it's constant
 
   const fetchGames = useCallback(async (params = '') => {
     try {
@@ -200,10 +204,7 @@ const Games = () => {
                 src={game.image_url}
                 alt={game.name}
                 className="game-image"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = DEFAULT_PLACEHOLDER;
-                }}
+                onError={handleImageError}
               />
               <label className="upload-image-btn">
                 <i className="fas fa-camera"></i>

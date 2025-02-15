@@ -8,17 +8,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Routing\Attribute\Route;
-use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 #[Route('/api/chat', name: 'app_chat_')]
 class ChatController extends AbstractController
 {
-    public function __construct(private LoggerInterface $logger)
-    {
-    }
-
     private function getFullAssetUrl(Request $request, string $path): string 
     {
         return '//' . $request->getHttpHost() . $path;
@@ -57,51 +52,51 @@ class ChatController extends AbstractController
                 return $this->json(['message' => 'Unauthorized'], 401);
             }
 
+            $message = $request->request->get('message', '');
+            /** @var UploadedFile|null $file */
             $file = $request->files->get('file');
-            $message = $request->request->get('message');
 
-            // Ensure at least one of message or file is provided
             if (empty($message) && !$file) {
                 return $this->json(['message' => 'Message or file is required'], 400);
             }
 
             $chat = new Chat();
-            $chat->setMessage($message ?? '');
+            $chat->setMessage($message);
             $chat->setUser($user);
 
             if ($file) {
+                $uploadDir = $this->getParameter('chat_files_directory');
+                
+                // Ensure directory exists and is writable
+                if (!is_dir($uploadDir)) {
+                    if (!mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+                        throw new \RuntimeException(sprintf('Directory "%s" could not be created', $uploadDir));
+                    }
+                }
+
                 // Validate file type
                 $mimeType = $file->getMimeType();
-                $originalExtension = strtolower($file->getClientOriginalExtension());
+                $extension = strtolower($file->getClientOriginalExtension());
                 
                 $allowedTypes = [
-                    'application/pdf' => 'pdf',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx'
+                    'application/pdf' => ['pdf'],
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx']
                 ];
 
-                if (!array_key_exists($mimeType, $allowedTypes) || 
-                    !in_array($originalExtension, ['pdf', 'docx'])) {
+                if (!isset($allowedTypes[$mimeType]) || !in_array($extension, $allowedTypes[$mimeType])) {
                     return $this->json([
                         'message' => 'Only PDF and DOCX files are allowed'
                     ], 400);
                 }
 
-                $uploadDir = $this->getParameter('chat_files_directory');
+                // Clean the original filename
+                $originalName = $file->getClientOriginalName();
+                $safeName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $originalName);
                 
-                // Create directory if it doesn't exist
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-
-                // Sanitize the original filename while keeping its name
-                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $this->slugify($originalName);
-                
-                // Add unique identifier as prefix to prevent overwriting
-                $newFilename = sprintf('%s-%s.%s', 
+                // Add unique identifier to prevent overwriting
+                $newFilename = sprintf('%s-%s', 
                     uniqid(),
-                    $safeFilename,
-                    $originalExtension
+                    $safeName
                 );
 
                 try {
@@ -109,14 +104,9 @@ class ChatController extends AbstractController
                     $fileUrl = '/uploads/chat/' . $newFilename;
                     $chat->setFileUrl($fileUrl);
                     $chat->setFileType($mimeType);
+                    chmod($uploadDir . '/' . $newFilename, 0644);
                 } catch (\Exception $e) {
-                    $this->logger->error('File upload failed', [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                        'original_name' => $file->getClientOriginalName(),
-                        'safe_name' => $newFilename
-                    ]);
-                    return $this->json(['message' => 'Failed to upload file'], 500);
+                    throw new \RuntimeException('Failed to upload file: ' . $e->getMessage());
                 }
             }
 
@@ -137,29 +127,9 @@ class ChatController extends AbstractController
             ], 201);
 
         } catch (\Exception $e) {
-            $this->logger->error('Chat message failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return $this->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+            return $this->json([
+                'message' => 'Upload error: ' . $e->getMessage()
+            ], 500);
         }
-    }
-
-    private function slugify(string $text): string
-    {
-        // Replace non letter or digits by -
-        $text = preg_replace('~[^\pL\d]+~u', '-', $text);
-        // Transliterate
-        $text = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9\-] remove; Lower()', $text);
-        // Remove unwanted characters
-        $text = preg_replace('~[^-\w]+~', '', $text);
-        // Trim
-        $text = trim($text, '-');
-        // Remove duplicate -
-        $text = preg_replace('~-+~', '-', $text);
-        // Lowercase
-        $text = strtolower($text);
-        
-        return empty($text) ? 'n-a' : $text;
     }
 }

@@ -112,6 +112,7 @@ const Marketplace = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleBuy = async (listingId) => {
     try {
       const token = localStorage.getItem('jwt_token');

@@ -7,6 +7,7 @@ parameters:
     avatar_directory: '%kernel.project_dir%/public/uploads/avatars'
     game_images_directory: '%kernel.project_dir%/public/uploads/games'
     chat_files_directory: '%kernel.project_dir%/public/uploads/chat'
+    upload_directory: '%kernel.project_dir%/public/uploads'
 
 services:
     # default configuration for services in *this* file

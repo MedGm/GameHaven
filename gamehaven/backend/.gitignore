@@ -32,3 +32,41 @@
 # Uploaded files
 /public/uploads/chat/*
 !/public/uploads/chat/.gitkeep
+
+# Environment variables and sensitive data
+.env
+.env.*
+*.pem
+*.key
+*.crt
+config/secrets/*
+
+# Cache and logs
+/var/cache/*
+/var/log/*
+*.log
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Composer
+composer.phar
+/vendor/
+
+# Database
+*.sql
+*.sqlite
+*.db
+
+# Uploaded files & media
+/public/uploads/*
+!/public/uploads/.gitkeep
+/public/media/*
+!/public/media/.gitkeep
+
+# Generated documentation
+/docs/api/*
+/phpdoc/*
