@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApiUrl } from '../utils/apiConfig';
 import './ReviewPage.css';
@@ -18,14 +18,9 @@ const ReviewPage = () => {
   });
   const [reviewerDetails, setReviewerDetails] = useState({});
   const [listingData, setListingData] = useState({});
-  const [transactionsData, setTransactionsData] = useState({}); // NEW state for transaction details
+  const [transactionsData, setTransactionsData] = useState({});
 
-  useEffect(() => {
-    fetchReviews();
-    fetchUserTransactions();
-  }, []);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const token = localStorage.getItem('jwt_token');
       const response = await fetch(getApiUrl('reviews'), {
@@ -57,7 +52,7 @@ const ReviewPage = () => {
       );
       setReviewerDetails(details);
       
-      // NEW: Fetch listing details using listing_id from review.transaction
+      // Fetch listing details
       const listingIds = [
         ...new Set(
           data.map(review => review.transaction?.listingId)
@@ -77,7 +72,7 @@ const ReviewPage = () => {
       );
       setListingData(listingsFetched);
       
-      // NEW: Fetch transaction details using review.transaction_id
+      // Fetch transaction details
       const transactionIds = [...new Set(data.map(review => review.transaction_id).filter(id => id))];
       const transactionsFetched = {};
       await Promise.all(
@@ -95,12 +90,11 @@ const ReviewPage = () => {
       setError('Failed to load reviews: ' + error.message);
       setReviews([]);
     }
-  };
+  }, []);
 
-  const fetchUserTransactions = async () => {
+  const fetchUserTransactions = useCallback(async () => {
     try {
       const token = localStorage.getItem('jwt_token');
-      const userId = localStorage.getItem('user_id');
       
       const response = await fetch(getApiUrl('transactions/user/purchases'), {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -108,7 +102,6 @@ const ReviewPage = () => {
       if (!response.ok) throw new Error('Failed to fetch transactions');
       const purchaseData = await response.json();
       
-      // Filter out transactions that have a matching review.transaction_id
       const unreviewedTransactions = purchaseData.filter(transaction => 
         !reviews.some(review => parseInt(review.transaction_id, 10) === transaction.id)
       );
@@ -120,13 +113,18 @@ const ReviewPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [reviews]);
+
+  useEffect(() => {
+    fetchReviews();
+    fetchUserTransactions();
+  }, [fetchReviews, fetchUserTransactions]);
 
   const handleCreateReview = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('jwt_token');
-      const userId = localStorage.getItem('user_id');
+      const reviewerId = localStorage.getItem('user_id'); // Renamed from userId to reviewerId
 
       const response = await fetch(getApiUrl('reviews'), {
         method: 'POST',
@@ -136,7 +134,7 @@ const ReviewPage = () => {
         },
         body: JSON.stringify({
           transaction_id: selectedTransaction.id,
-          reviewer_id: parseInt(userId),
+          reviewer_id: parseInt(reviewerId),
           reviewed_id: selectedTransaction.seller.id, // Use seller ID from transaction
           rating: parseInt(newReview.rating),
           comment: newReview.comment

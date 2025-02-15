@@ -10,17 +10,19 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "ajv": "^8.12.0",
+    "ajv-keywords": "^5.1.0",
     "cra-template": "1.2.0",
-    "dotenv": "^16.4.7",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-emoji-render": "^2.0.1",
+    "http-proxy-middleware": "^3.0.3",
+    "nth-check": "^2.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-router-dom": "^6.29.0",
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
+    "start": "DANGEROUSLY_DISABLE_HOST_CHECK=true NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -29,7 +31,14 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "react-hooks/exhaustive-deps": "warn",
+      "no-unused-vars": "warn",
+      "react/jsx-no-bind": "off",
+      "react/jsx-uses-react": "off",
+      "react/react-in-jsx-scope": "off"
+    }
   },
   "browserslist": {
     "production": [
@@ -43,5 +52,13 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8000"
+  "proxy": "http://127.0.0.1:8000",
+  "overrides": {
+    "postcss": "^8.4.31",
+    "nth-check": "^2.1.1",
+    "css-select": "^4.1.3",
+    "svgo": "^2.8.0",
+    "@svgr/webpack": "^8.0.1",
+    "resolve-url-loader": "^5.0.0"
+  }
 }

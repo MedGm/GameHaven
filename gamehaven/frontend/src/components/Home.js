@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import './Home.css';
 
@@ -13,11 +13,6 @@ const Home = () => {
     } else {
       navigate(path);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('jwt_token');
-    window.location.reload(); // Reload to update auth state
   };
 
   return (

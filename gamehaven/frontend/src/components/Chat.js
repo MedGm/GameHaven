@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +23,7 @@ const Chat = () => {
     }
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       if (!token) {
         navigate('/login');
@@ -45,13 +45,13 @@ const Chat = () => {
       setError('Failed to load messages');
       console.error('Error:', error);
     }
-  };
+  }, [navigate, token]);
 
   useEffect(() => {
     fetchMessages();
-    const interval = setInterval(fetchMessages, 5000); // Poll every 5 seconds
+    const interval = setInterval(fetchMessages, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchMessages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -68,6 +68,9 @@ const Chat = () => {
       const fileExtension = file.name.split('.').pop().toLowerCase();
       if (!['pdf', 'docx'].includes(fileExtension)) {
         setError('Only PDF and DOCX files are allowed');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
         return;
       }
       
@@ -126,13 +129,26 @@ const Chat = () => {
         {message.message && <p className="message-text">{message.message}</p>}
         {message.fileUrl && (
           <div className="message-attachment">
-            {message.fileType?.startsWith('image/') ? (
-              <img 
-                src={message.fileUrl} 
-                alt="attachment" 
-                className="message-image"
-                onClick={() => window.open(message.fileUrl, '_blank')}
-              />
+            {message.fileType === 'application/pdf' ? (
+              <a 
+                href={message.fileUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="file-attachment"
+              >
+                <i className="fas fa-file-pdf"></i>
+                {message.fileUrl.split('/').pop().substring(13)} {/* Remove unique prefix */}
+              </a>
+            ) : message.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
+              <a 
+                href={message.fileUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="file-attachment"
+              >
+                <i className="fas fa-file-word"></i>
+                {message.fileUrl.split('/').pop().substring(13)}
+              </a>
             ) : (
               <a 
                 href={message.fileUrl} 
@@ -141,7 +157,7 @@ const Chat = () => {
                 className="file-attachment"
               >
                 <i className="fas fa-file"></i>
-                Download Attachment
+                Download File
               </a>
             )}
           </div>
